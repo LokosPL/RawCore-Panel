@@ -1,13 +1,23 @@
-RAWCRAFT Control 1.4.9 — wiele instancji i kreator
+# RAWCRAFT Control 1.5.0 — terminal SSH i nowy panel zarządzania
 
-Baza: 6402aeeaf2ed61adc91d219fa38b119df82f769c / PR #9 (1.4.8), zachowująca PR #8 / 1.4.7. Bez scalania i instalacji na VPS.
+## Terminal SSH
+- Nowy edytor wieloliniowy do wklejania serii komend (do 128 KiB UTF-8).
+- Potwierdzenie przed uruchomieniem skryptu, podgląd liczby linii i rozmiaru, skrót Ctrl+Enter.
+- Skrypt działa w osobnej, nieinteraktywnej sesji SSH przez `bash -se`: polecenia są wykonywane w kolejności, a seria zatrzymuje się po błędzie.
+- Zbiorczy wynik standardowego wyjścia i błędów, kod zakończenia, ograniczenie do 512 KiB i możliwość kopiowania.
+- Interaktywny terminal xterm nadal obsługuje zwykłe polecenia, historię, edytory, Ctrl+C i wklejanie przez Ctrl+V.
+- Limity, walidacja UTF-8, ochrona przed znakami sterującymi i ograniczenie wykonania do 120 sekund.
 
-Dodano listę instancji z osobnym katalogiem, procesem PM2, portami, wersją, Java i RAM. Wcześniejszy profil pozostaje serwerem głównym. Wybór serwera wiąże pliki, RCON, logi, backupy i status płatności z jego konfiguracją. Każde żądanie ma identyfikator instancji i rewizję profilu; błędne ścieżki i stare rewizje są odrzucane, numery PM2 są dodatkowo weryfikowane po nazwie i katalogu procesu. Terminal otwiera się w katalogu instancji i zachowuje własny identyfikator sesji.
+## Interfejs
+- Nowy pulpit operacyjny z wyraźnymi skrótami do terminala i plików, odświeżona nawigacja, karty usług oraz widoki jasny i ciemny.
+- Terminal w oddzielnej konsoli o wysokim kontraście, status sesji oraz wygodny, responsywny edytor skryptów.
+- Uporządkowane odnośniki aktualizacji do rzeczywistego repozytorium `LokosPL/RawCore-Panel`.
 
-Przełączanie czyści dane poprzedniej instancji i ignoruje spóźnione odpowiedzi. Nie pozwala przełączyć celu w trakcie operacji zapisu/przesyłania/akcji/edycji.
+## Uwagi bezpieczeństwa
+- Skrypty wykonują rzeczywiste operacje na VPS i mogą usuwać dane. Używaj ich świadomie.
+- Skrypty są odpalane w osobnej powłoce Bash z katalogiem wybranej instancji. Nie dziedziczą zmian `cd` ani `sudo -i` z terminala interaktywnego.
+- Do programów interaktywnych i podawania hasła `sudo` użyj górnego terminala.
+- Uwierzytelnianie i weryfikacja klucza hosta SSH pozostają bez zmian.
 
-Kreator: najpierw podgląd sprawdza katalog, konflikty portów TCP IPv4/IPv6 oraz porty zapisane w server.properties istniejących instancji, także zatrzymanych, nazwy i katalogi PM2 oraz działanie Java. Po świadomym wybraniu „Przygotuj pliki” tworzy wyłącznie nowy katalog, kopiuje wskazany JAR silnika i zapisuje osobne server.properties i lokalne API Core na osobnym porcie (nowy klucz API, most i płatności wyłączone), niezaakceptowaną EULA, nieaktywny Transfer/Voting i izolowaną bazę Core SQLite. Nie kopiuje danych, sekretów, produkcyjnej bazy, ekonomii ani konfiguracji Discord/płatności; Core instalujesz z wydania osobno. Zapisuje ecosystem.config.json z autorestart=false, ale nie rejestruje i nie uruchamia procesu. Przed startem operator weryfikuje JAR/Java, połączenia i firewall oraz akceptuje EULA.
-
-Jest to przygotowanie instancji, nie automatyczna instalacja na VPS użytkownika. Nie zweryfikowano rzeczywistej topologii/portów VPS ani Minecraft na żywo. Natywne transfery Core wymagają trzech uruchomionych instancji (głównej, testowej i lobby); konfiguracja nie zakłada proxy.
-
-Zachowano aktualizator z potwierdzeniem startu i rollbackiem, małe okno błędu, odporność na zablokowane .old/.new, stary helper, terminal z prawdziwym echo i ochroną poprzedniej sesji, host key oraz klucz płatności pozostający na VPS. Testy: Go vet/race Linux/Windows, Playwright, Python i rzeczywiste EXE/instalator w Actions. Wynik bieżącego wydania należy sprawdzić w CI.
+## Wymagania
+Windows x64, aktualne WebView2 i dostęp SSH do VPS. Aktualizacja dostępna w panelu lub przez instalator na GitHub Releases.

@@ -58,7 +58,7 @@ Aplikacja rozłączy SSH i otworzy nowe okno. Procesy na VPS nadal działają.
 Poprzedni EXE pozostaje pod nazwą .old. Błąd podmiany przywraca poprzedni plik.
 Komunikaty błędów instalacji: katalog cache konta / RawcraftControl / updates.
 
-Repozytorium LokosPL/RawCore-Panel jest prywatne:
+Repozytorium aktualizacji: LokosPL/RawCore-Panel (publiczne):
 - W Ustawieniach wklej fine-grained token GitHub ograniczony do tego repozytorium
   z uprawnieniem Contents: Read-only. Token tworzysz na swoim koncie GitHub.
 - Windows DPAPI szyfruje zapisany token dla bieżącego użytkownika Windows.
@@ -162,7 +162,7 @@ Wersja 1.3.4 — monitoring, dysk i wygodniejszy widok
 - Ekran startowy z pulsującym logo zamiast formularza przy automatycznym logowaniu.
 - Aktualizacja dostępna także przed połączeniem z VPS; wykrywanie braku dostępu GitHub.
   Repozytorium jest prywatne: wymagany własny token fine-grained ograniczony do
-  RawCore-Control z Contents: Read-only. Zapisz go raz w ustawieniach aplikacji.
+  RawCore-Panel z Contents: Read-only. Zapisz go raz w ustawieniach aplikacji.
   Tokenu połączenia GitHub w ChatGPT nie można przenieść automatycznie do aplikacji.
 
 

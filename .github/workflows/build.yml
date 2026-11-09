@@ -53,6 +53,7 @@ jobs:
       - run: python3 tests/test_atomic_upload.py
       - run: node tests/console.cjs
       - run: node tests/terminal-latency.cjs
+      - run: node tests/terminal-workspace.cjs
       - run: node tests/ui.cjs
       - run: node tests/instances.cjs
       - run: python3 tests/test_instance_prepare.py
@@ -109,15 +110,15 @@ jobs:
         run: |
           $previousDir = Join-Path $env:RUNNER_TEMP 'PreviousControl'
           New-Item -ItemType Directory -Force $previousDir | Out-Null
-          gh release view v1.4.2 --json id 2>$null
+          gh release view v1.4.9 --json id 2>$null
           if ($LASTEXITCODE -ne 0) {
-            Write-Host 'Previous v1.4.2 release is absent in this new repository; skipping legacy updater compatibility test.'
+            Write-Host 'Previous v1.4.9 release is absent; skipping updater compatibility test.'
             exit 0
           }
-          gh release download v1.4.2 --pattern RAWCRAFT-Control.exe --dir $previousDir
+          gh release download v1.4.9 --pattern RAWCRAFT-Control.exe --dir $previousDir
           if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch previous updater for compatibility test' }
           $previous = Join-Path $previousDir 'RAWCRAFT-Control.exe'
-          if ((Get-FileHash $previous -Algorithm SHA256).Hash.ToLower() -ne '3582ace4b858d4224ef2764dbb2288945e840e808e961616a85390fd21e930dc') { throw 'Previous release checksum mismatch' }
+          if ((Get-FileHash $previous -Algorithm SHA256).Hash.ToLower() -ne 'fedcfd69221006b95e6babc2e14d89251afe6958de6f8541207950d09e1ae62c') { throw 'Previous release checksum mismatch' }
           "RAWCRAFT_PREVIOUS_EXE=$previous" >> $env:GITHUB_ENV
       - name: Verify custom installation, update and uninstall
         shell: pwsh
@@ -125,7 +126,7 @@ jobs:
       - name: Package complete sources and provenance
         shell: pwsh
         run: |
-          git -c core.autocrlf=false archive --format=zip --output=dist/RAWCRAFT-Control-1.4.9-src.zip HEAD
+          git -c core.autocrlf=false archive --format=zip --output=dist/RAWCRAFT-Control-1.5.0-src.zip HEAD
           if ($LASTEXITCODE -ne 0) { throw 'Source archive failed' }
           git rev-parse HEAD | Set-Content -Encoding ascii dist/COMMIT.txt
           Copy-Item INTEGRATION_PL.md,RELEASE_NOTES_PL.md dist/
