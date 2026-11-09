@@ -37,38 +37,62 @@ type UpdateStatus struct {
 
 var updates = struct {
 	sync.Mutex
-	Status UpdateStatus
-	Busy   bool
- Pending bool
-	Staged string
-	Hash   string
+	Status  UpdateStatus
+	Busy    bool
+	Pending bool
+	Staged  string
+	Hash    string
 }{Status: UpdateStatus{State: "idle", Message: "Oczekiwanie na sprawdzenie", Current: appVersion}}
+
 // Only GitHub's fixed API routes and release storage can receive updater traffic.
 var githubClient = &http.Client{Timeout: 20 * time.Minute, CheckRedirect: checkUpdateRedirect}
 
 func validUpdateAPI(u *url.URL) bool {
- if u.Scheme != "https" || u.Host != "api.github.com" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || u.RawPath != "" { return false }
- base := "/repos/"+updateRepository+"/releases/"
- if u.Path == base+"latest" { return true }
- id := strings.TrimPrefix(u.Path,base+"assets/")
- if id == u.Path || id == "" { return false }
- for _, r := range id { if r < '0' || r > '9' { return false } }
- return true
+	if u.Scheme != "https" || u.Host != "api.github.com" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || u.RawPath != "" {
+		return false
+	}
+	base := "/repos/" + updateRepository + "/releases/"
+	if u.Path == base+"latest" {
+		return true
+	}
+	id := strings.TrimPrefix(u.Path, base+"assets/")
+	if id == u.Path || id == "" {
+		return false
+	}
+	for _, r := range id {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 func checkUpdateRedirect(req *http.Request, via []*http.Request) error {
- if len(via)>8 { return errors.New("Zbyt wiele przekierowań") }
- u:=req.URL
- if u.Scheme!="https" || u.User!=nil || u.Fragment!="" { return errors.New("Nieprawidłowe przekierowanie aktualizacji") }
- if u.Host=="api.github.com" {
-  if !validUpdateAPI(u) { return errors.New("Nieprawidłowy adres API aktualizacji") }
-  for _, previous:=range via { if previous.URL.Host!="api.github.com" { req.Header.Del("Authorization");break } }
-  return nil
- }
- req.Header.Del("Authorization")
- switch u.Host {
- case "release-assets.githubusercontent.com", "objects.githubusercontent.com", "github-releases.githubusercontent.com": return nil
- default: return errors.New("Niedozwolony serwer pobierania aktualizacji")
- }
+	if len(via) > 8 {
+		return errors.New("Zbyt wiele przekierowań")
+	}
+	u := req.URL
+	if u.Scheme != "https" || u.User != nil || u.Fragment != "" {
+		return errors.New("Nieprawidłowe przekierowanie aktualizacji")
+	}
+	if u.Host == "api.github.com" {
+		if !validUpdateAPI(u) {
+			return errors.New("Nieprawidłowy adres API aktualizacji")
+		}
+		for _, previous := range via {
+			if previous.URL.Host != "api.github.com" {
+				req.Header.Del("Authorization")
+				break
+			}
+		}
+		return nil
+	}
+	req.Header.Del("Authorization")
+	switch u.Host {
+	case "release-assets.githubusercontent.com", "objects.githubusercontent.com", "github-releases.githubusercontent.com":
+		return nil
+	default:
+		return errors.New("Niedozwolony serwer pobierania aktualizacji")
+	}
 }
 
 func stableVersion(s string) ([3]int, error) {
@@ -124,7 +148,7 @@ func githubRequest(ctx context.Context, rawURL, token, accept string) (*http.Res
 		return nil, e
 	}
 	req.Header.Set("Accept", accept)
- req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("User-Agent", "RAWCRAFT-Control/"+appVersion)
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	if token != "" {
@@ -136,30 +160,48 @@ func githubRequest(ctx context.Context, rawURL, token, accept string) (*http.Res
 	}
 	if resp.StatusCode != 200 {
 		resp.Body.Close()
-        if resp.StatusCode==403&&resp.Header.Get("X-RateLimit-Remaining")=="0"{return nil,errors.New("Limit zapytań GitHub został wyczerpany. Aktualizator spróbuje ponownie później.")}
-        if resp.StatusCode==401||resp.StatusCode==403||resp.StatusCode==404 {
-            return nil, &updateAccessError{Code:resp.StatusCode}
-        }
-        return nil, fmt.Errorf("GitHub HTTP %d. Spróbuj ponownie za chwilę.",resp.StatusCode)
+		if resp.StatusCode == 403 && resp.Header.Get("X-RateLimit-Remaining") == "0" {
+			return nil, errors.New("Limit zapytań GitHub został wyczerpany. Aktualizator spróbuje ponownie później.")
+		}
+		if resp.StatusCode == 401 || resp.StatusCode == 403 || resp.StatusCode == 404 {
+			return nil, &updateAccessError{Code: resp.StatusCode}
+		}
+		return nil, fmt.Errorf("GitHub HTTP %d. Spróbuj ponownie za chwilę.", resp.StatusCode)
 	}
 	return resp, nil
 }
 
 type updateAccessError struct{ Code int }
-func (e *updateAccessError) Error() string {return fmt.Sprintf("GitHub HTTP %d: token jest nieważny, wygasł albo nie ma dostępu do repozytorium RawCore-Panel (Contents: Read-only).",e.Code)}
-func updateFailure(e error){var access *updateAccessError;if errors.As(e,&access){setUpdate("access_denied",e.Error());return};setUpdate("error",e.Error())}
+
+func (e *updateAccessError) Error() string {
+	return fmt.Sprintf("GitHub HTTP %d: token jest nieważny, wygasł albo nie ma dostępu do repozytorium RawCore-Panel (Contents: Read-only).", e.Code)
+}
+func updateFailure(e error) {
+	var access *updateAccessError
+	if errors.As(e, &access) {
+		setUpdate("access_denied", e.Error())
+		return
+	}
+	setUpdate("error", e.Error())
+}
 
 func checksumFor(data []byte, name string) (string, error) {
- var found string
- for _, line := range strings.Split(string(data), "\n") {
-  fields:=strings.Fields(line)
-  if len(fields)!=2 || strings.TrimPrefix(fields[1],"*")!=name { continue }
-  raw,e:=hex.DecodeString(fields[0])
-  if e!=nil || len(raw)!=32 || found!="" { return "",errors.New("Niepoprawna lub powtórzona suma SHA-256 aplikacji") }
-  found=strings.ToLower(fields[0])
- }
- if found!="" { return found,nil }
- return "",errors.New("Brak poprawnej sumy SHA-256 aplikacji w SHA256SUMS")
+	var found string
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) != 2 || strings.TrimPrefix(fields[1], "*") != name {
+			continue
+		}
+		raw, e := hex.DecodeString(fields[0])
+		if e != nil || len(raw) != 32 || found != "" {
+			return "", errors.New("Niepoprawna lub powtórzona suma SHA-256 aplikacji")
+		}
+		found = strings.ToLower(fields[0])
+	}
+	if found != "" {
+		return found, nil
+	}
+	return "", errors.New("Brak poprawnej sumy SHA-256 aplikacji w SHA256SUMS")
 }
 
 func updateSnapshot() UpdateStatus { updates.Lock(); defer updates.Unlock(); return updates.Status }
@@ -170,7 +212,17 @@ func setUpdate(state, message string) {
 	updates.Unlock()
 }
 func updateLoop() {
-    if dir,e:=os.UserCacheDir();e==nil{path:=filepath.Join(dir,"RawcraftControl","updates","install-error.txt");if b,e:=os.ReadFile(path);e==nil{setUpdate("install_error","Poprzednia aktualizacja nie została zainstalowana: "+string(b));_ = os.Remove(path)}else{checkForUpdate(false)}}else{checkForUpdate(false)}
+	if dir, e := os.UserCacheDir(); e == nil {
+		path := filepath.Join(dir, "RawcraftControl", "updates", "install-error.txt")
+		if b, e := os.ReadFile(path); e == nil {
+			setUpdate("install_error", "Poprzednia aktualizacja nie została zainstalowana: "+string(b))
+			_ = os.Remove(path)
+		} else {
+			checkForUpdate(false)
+		}
+	} else {
+		checkForUpdate(false)
+	}
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 	for range ticker.C {
@@ -179,8 +231,14 @@ func updateLoop() {
 }
 func checkForUpdate(manual bool) {
 	updates.Lock()
-	if updates.Busy {if manual{updates.Pending=true};updates.Unlock();return}
- if updates.Status.State == "ready" {
+	if updates.Busy {
+		if manual {
+			updates.Pending = true
+		}
+		updates.Unlock()
+		return
+	}
+	if updates.Status.State == "ready" {
 		updates.Unlock()
 		return
 	}
@@ -189,10 +247,13 @@ func checkForUpdate(manual bool) {
 	defer func() {
 		updates.Lock()
 		updates.Busy = false
-        pending:=updates.Pending;updates.Pending=false
+		pending := updates.Pending
+		updates.Pending = false
 		updates.Status.CheckedAt = time.Now().Format(time.RFC3339)
 		updates.Unlock()
-        if pending{go checkForUpdate(true)}
+		if pending {
+			go checkForUpdate(true)
+		}
 	}()
 	settings.RLock()
 	enabled, token := settings.Prefs.AutoUpdate, settings.Token
@@ -205,15 +266,22 @@ func checkForUpdate(manual bool) {
 		setUpdate("unsupported", "Automatyczne aktualizacje są dostępne dla Windows x64")
 		return
 	}
-    if strings.TrimSpace(token)==""{setUpdate("needs_token","Wymagana jednorazowa autoryzacja prywatnych aktualizacji GitHub.");return}
+	if strings.TrimSpace(token) == "" {
+		setUpdate("needs_token", "Wymagana jednorazowa autoryzacja prywatnych aktualizacji GitHub.")
+		return
+	}
 	setUpdate("checking", "Sprawdzanie aktualizacji…")
-    updates.Lock();updates.Status.Downloaded=0;updates.Status.Total=0;updates.Status.SHA256="";updates.Unlock()
+	updates.Lock()
+	updates.Status.Downloaded = 0
+	updates.Status.Total = 0
+	updates.Status.SHA256 = ""
+	updates.Unlock()
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
-	metadataCtx,metadataCancel:=context.WithTimeout(ctx,25*time.Second)
- resp,e:=githubRequest(metadataCtx,"https://api.github.com/repos/"+updateRepository+"/releases/latest",token,"application/vnd.github+json")
+	metadataCtx, metadataCancel := context.WithTimeout(ctx, 25*time.Second)
+	resp, e := githubRequest(metadataCtx, "https://api.github.com/repos/"+updateRepository+"/releases/latest", token, "application/vnd.github+json")
 	if e != nil {
-        metadataCancel()
+		metadataCancel()
 		updateFailure(e)
 		return
 	}
@@ -229,7 +297,7 @@ func checkForUpdate(manual bool) {
 	}
 	e = json.NewDecoder(io.LimitReader(resp.Body, 2<<20)).Decode(&release)
 	resp.Body.Close()
- metadataCancel()
+	metadataCancel()
 	if e != nil {
 		setUpdate("error", "Niepoprawna odpowiedź GitHub")
 		return
@@ -402,12 +470,17 @@ func handleApplyUpdate(w http.ResponseWriter, r *http.Request) {
 		fail(e)
 		return
 	}
-	targetDir:=filepath.Dir(appExe)
- probe,e:=os.CreateTemp(targetDir,".rawcraft-update-write-*")
- if e!=nil{fail(errors.New("Folder aplikacji nie pozwala na zapis. Zainstaluj panel w folderze swojego konta albo przenieś wersję portable do zapisywalnego folderu."));return}
- probeName:=probe.Name();probe.Close();os.Remove(probeName)
- dir := filepath.Dir(path)
- helper, e := os.CreateTemp(dir, "installer-*.exe")
+	targetDir := filepath.Dir(appExe)
+	probe, e := os.CreateTemp(targetDir, ".rawcraft-update-write-*")
+	if e != nil {
+		fail(errors.New("Folder aplikacji nie pozwala na zapis. Zainstaluj panel w folderze swojego konta albo przenieś wersję portable do zapisywalnego folderu."))
+		return
+	}
+	probeName := probe.Name()
+	probe.Close()
+	os.Remove(probeName)
+	dir := filepath.Dir(path)
+	helper, e := os.CreateTemp(dir, "installer-*.exe")
 	if e != nil {
 		fail(e)
 		return
@@ -425,15 +498,27 @@ func handleApplyUpdate(w http.ResponseWriter, r *http.Request) {
 		fail(e)
 		return
 	}
-	if e = verifyExecutable(helperName,hash);e!=nil{os.Remove(helperName);fail(e);return}
- endpoint,waitReady,closeHandoff,e:=installerHandoff(hash)
- if e!=nil{os.Remove(helperName);fail(e);return};defer closeHandoff()
- if e = startGUI(helperName, "--install-update", strconv.Itoa(os.Getpid()), target, path, hash, endpoint); e != nil {
+	if e = verifyExecutable(helperName, hash); e != nil {
 		os.Remove(helperName)
 		fail(e)
 		return
 	}
- if e=waitReady();e!=nil{fail(e);return}
+	endpoint, waitReady, closeHandoff, e := installerHandoff(hash)
+	if e != nil {
+		os.Remove(helperName)
+		fail(e)
+		return
+	}
+	defer closeHandoff()
+	if e = startGUI(helperName, "--install-update", strconv.Itoa(os.Getpid()), target, path, hash, endpoint); e != nil {
+		os.Remove(helperName)
+		fail(e)
+		return
+	}
+	if e = waitReady(); e != nil {
+		fail(e)
+		return
+	}
 	ok(w, map[string]bool{"ok": true})
 	go func() { time.Sleep(time.Second); os.Exit(0) }()
 }
@@ -457,7 +542,9 @@ func copyFile(from, to string) error {
 	}
 	return e
 }
+
 // Compatibility entry point for callers that only need the committed replacement.
 func replaceExecutable(target, staged, expected string) error {
- _,err:=replaceWithBackup(target,staged,expected);return err
+	_, err := replaceWithBackup(target, staged, expected)
+	return err
 }

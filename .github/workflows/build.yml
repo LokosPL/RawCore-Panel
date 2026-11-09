@@ -112,7 +112,7 @@ jobs:
           New-Item -ItemType Directory -Force $previousDir | Out-Null
           gh release view v1.4.9 --json id 2>$null
           if ($LASTEXITCODE -ne 0) {
-            Write-Host 'Previous v1.4.9 release is absent in this new repository; skipping legacy updater compatibility test.'
+            Write-Host 'Previous v1.4.9 release is absent; skipping updater compatibility test.'
             exit 0
           }
           gh release download v1.4.9 --pattern RAWCRAFT-Control.exe --dir $previousDir
