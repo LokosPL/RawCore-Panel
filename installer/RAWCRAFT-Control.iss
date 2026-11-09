@@ -26,7 +26,7 @@ WizardStyle=modern
 CloseApplications=yes
 CloseApplicationsFilter=RAWCRAFT-Control.exe
 RestartApplications=no
-AppUpdatesURL=https://github.com/LokosPL/RawCore-Control/releases/latest
+AppUpdatesURL=https://github.com/LokosPL/RawCore-Panel/releases/latest
 
 [Languages]
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"

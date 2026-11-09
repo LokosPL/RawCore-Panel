@@ -109,6 +109,11 @@ jobs:
         run: |
           $previousDir = Join-Path $env:RUNNER_TEMP 'PreviousControl'
           New-Item -ItemType Directory -Force $previousDir | Out-Null
+          gh release view v1.4.2 --json id 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host 'Previous v1.4.2 release is absent in this new repository; skipping legacy updater compatibility test.'
+            exit 0
+          }
           gh release download v1.4.2 --pattern RAWCRAFT-Control.exe --dir $previousDir
           if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch previous updater for compatibility test' }
           $previous = Join-Path $previousDir 'RAWCRAFT-Control.exe'

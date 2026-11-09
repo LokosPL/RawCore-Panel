@@ -58,7 +58,7 @@ Aplikacja rozłączy SSH i otworzy nowe okno. Procesy na VPS nadal działają.
 Poprzedni EXE pozostaje pod nazwą .old. Błąd podmiany przywraca poprzedni plik.
 Komunikaty błędów instalacji: katalog cache konta / RawcraftControl / updates.
 
-Repozytorium LokosPL/RawCore-Control jest prywatne:
+Repozytorium LokosPL/RawCore-Panel jest prywatne:
 - W Ustawieniach wklej fine-grained token GitHub ograniczony do tego repozytorium
   z uprawnieniem Contents: Read-only. Token tworzysz na swoim koncie GitHub.
 - Windows DPAPI szyfruje zapisany token dla bieżącego użytkownika Windows.

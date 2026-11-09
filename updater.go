@@ -20,7 +20,7 @@ import (
 )
 
 const appVersion = "1.4.9"
-const updateRepository = "LokosPL/RawCore-Control"
+const updateRepository = "LokosPL/RawCore-Panel"
 const updateAsset = "RAWCRAFT-Control.exe"
 const maxUpdateSize int64 = 256 << 20
 
