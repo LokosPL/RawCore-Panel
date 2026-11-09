@@ -81,7 +81,43 @@ body{background:var(--bg);letter-spacing:.01px}
 <div id="toast" class="msg hide" role="status" aria-live="polite"></div>
 <dialog id="confirmdialog"><h2 id="confirmtitle">Potwierdź działanie</h2><p id="confirmtext"></p><div class="row" style="justify-content:flex-end;margin-top:22px"><button id="confirmcancel">Anuluj</button><button id="confirmok" class="primary">Kontynuuj</button></div></dialog>
 <dialog id="rawcorelogdialog" style="width:min(900px,95vw)"><div class="row between"><h3>RawCore Survival — dziennik systemd</h3><button type="button" onclick="$('rawcorelogdialog').close()">Zamknij</button></div><pre id="rawcorelogstext" style="background:#0b1017;color:#d9e5f4;white-space:pre-wrap;max-height:65vh;overflow:auto;padding:16px;border-radius:8px"></pre></dialog>
-<dialog id="instancewizard" style="width:min(650px,95vw)"><h2>Przygotuj osobną instancję</h2><p>Tworzy nowe pliki i osobną bazę SQLite. Nie uruchamia serwera ani procesu PM2. Nie kopiuje kont, ekonomii, Discorda ani kluczy płatności.</p><form id="instanceform"><div class="accountgrid"><div><label>ID (np. testowy lub lobby)<input id="newinstanceid" required pattern="[a-z0-9][a-z0-9_-]{0,31}" value="testowy"></label><label>Nazwa<input id="newinstancename" required value="Serwer testowy"></label><label>Nowy katalog na VPS<input id="newinstancepath" required placeholder="/opt/minecraft/testowy"></label><label>Nazwa procesu PM2<input id="newinstanceprocess" required value="minecraft-testowy"></label></div><div><label>Port gry<input id="newinstanceport" type="number" required min="1" max="65535" value="25566"></label><label>Port RCON<input id="newinstancercon" type="number" required min="1" max="65535" value="25576"></label><label>Port API Core (lokalny)<input id="newinstancecore" type="number" required min="1" max="65535" value="8767"></label><label>Java (pełna ścieżka)<input id="newinstancejava" required value="/usr/bin/java"></label><label>RAM (MB)<input id="newinstanceram" type="number" required min="512" max="65536" value="2048"></label></div></div><label>Wersja silnika (sprawdź plik źródłowy)<input id="newinstanceversion" required placeholder="np. Paper 26.3"></label><label>Istniejący JAR silnika w zapisanej instancji<input id="newinstancejar" required placeholder="/opt/minecraft/server/server.jar"></label><p class="hint">Skopiowany będzie tylko wskazany JAR silnika. Core instalujesz osobno z Releases. EULA pozostaje niezaakceptowana. Połączenia przez lobby konfigurujesz w Transfer.json w każdej instancji.</p><pre id="instanceplan" style="white-space:pre-wrap"></pre><div class="row"><button type="button" onclick="closeInstanceWizard()">Zamknij</button><button id="instancepreview" type="submit">Sprawdź i pokaż plan</button><button id="instancecreate" type="button" class="primary hide" onclick="prepareInstance()">Przygotuj pliki</button></div></form></dialog>
+<dialog id="instancewizard" style="width:min(760px,96vw)">
+<h2>Nowy serwer Paper 26.3</h2>
+<p class="hint">Wybierz pluginy — panel pobierze stabilne, kompatybilne wersje i sprawdzi sumy kontrolne. Nie nadpisujemy istniejącego świata ani działającego serwera. Start dopiero po akceptacji EULA.</p>
+<form id="instanceform">
+<div class="accountgrid">
+<div>
+<label>ID serwera<input id="newinstanceid" required pattern="[a-z0-9][a-z0-9_-]{0,31}" value="survival"></label>
+<label>Nazwa serwera<input id="newinstancename" required value="RawCore Survival"></label>
+<label>Port gry<input id="newinstanceport" type="number" required min="1024" max="65535" value="25566"></label>
+</div>
+<div>
+<label>RAM (MB)<input id="newinstanceram" type="number" required min="1024" max="65536" step="256" value="4096"></label>
+<div class="card pad" style="margin-top:12px"><strong>Silnik</strong><p class="hint" style="margin:6px 0 0">Paper 26.3 · najnowszy stabilny build · Java 25</p></div>
+<input id="newinstanceversion" type="hidden" value="Paper 26.3">
+</div>
+</div>
+<h3 style="margin:14px 0 8px">Pluginy do pobrania</h3>
+<div class="catalogpluginlist" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0">
+<label class="card pad" style="cursor:pointer;display:flex;align-items:center;gap:10px"><input type="checkbox" class="catalogplugin" value="viaversion" checked><span><strong>ViaVersion</strong><small style="display:block">Obsługa nowszych klientów</small></span></label>
+<label class="card pad" style="cursor:pointer;display:flex;align-items:center;gap:10px"><input type="checkbox" class="catalogplugin" value="viabackwards" checked><span><strong>ViaBackwards</strong><small style="display:block">Obsługa starszych klientów</small></span></label>
+<label class="card pad" style="cursor:pointer;display:flex;align-items:center;gap:10px"><input type="checkbox" class="catalogplugin" value="viarewind" checked><span><strong>ViaRewind</strong><small style="display:block">Dodatkowe stare protokoły</small></span></label>
+<label class="card pad" style="cursor:pointer;display:flex;align-items:center;gap:10px"><input type="checkbox" class="catalogplugin" value="worldedit" checked><span><strong>WorldEdit</strong><small style="display:block">Edycja mapy i schematy</small></span></label>
+</div>
+<p class="hint">Wymagania: ViaRewind potrzebuje ViaBackwards i ViaVersion. Pluginy są opcjonalne. Instalowane są wyłącznie wydania stabilne deklarujące zgodność z Paper 26.3.</p>
+<details style="margin:10px 0 16px"><summary>Ustawienia zaawansowane — katalog, proces i Java</summary>
+<div class="accountgrid" style="margin-top:12px">
+<div><label>Nowy katalog na VPS<input id="newinstancepath" required></label><label>Proces PM2<input id="newinstanceprocess" required></label></div>
+<div><label>Java 25 (pełna ścieżka)<input id="newinstancejava" required></label><label>Port RCON (wyłączony domyślnie)<input id="newinstancercon" type="number" required min="1024" max="65535"></label><label>Port API Core (rezerwacja)<input id="newinstancecore" type="number" required min="1024" max="65535"></label></div>
+</div>
+</details>
+<pre id="instanceplan" style="white-space:pre-wrap;max-height:260px;overflow:auto"></pre>
+<div class="row" style="flex-wrap:wrap"><button type="button" onclick="closeInstanceWizard()">Zamknij</button><button id="instancepreview" type="submit">Sprawdź porty i pokaż plan</button><button id="instancecreate" type="button" class="primary hide" onclick="prepareInstance()">Pobierz Paper i pluginy</button></div>
+<div id="instanceeulabox" class="hide card pad" style="margin-top:12px">
+<label style="display:flex;gap:10px;align-items:flex-start"><input id="instanceeulacheck" type="checkbox" style="margin-top:5px"><span>Przeczytałem/am i akceptuję <a href="https://aka.ms/MinecraftEULA" target="_blank" rel="noopener noreferrer">EULA Minecraft</a>. Uruchom serwer i zarejestruj go w PM2.</span></label>
+<button id="instancestart" type="button" class="primary" onclick="startPreparedInstance()">Zaakceptuj EULA i uruchom</button>
+</div>
+</form></dialog>
 <dialog id="githubdialog"><h2>Autoryzacja aktualizacji</h2><p>Dla publicznego repozytorium token nie jest wymagany. Jeśli korzystasz z prywatnego mirrora, podaj dostęp tylko raz — Windows zapisze go w postaci zaszyfrowanej. Aplikacja nie wyświetla zapisanego tokenu.</p><p class="hint">Opcjonalny token fine-grained: repozytorium RawCore-Panel, Contents: Read-only.</p><form id="githubform"><label for="githubcredential">Token dostępu GitHub</label><input id="githubcredential" type="password" autocomplete="off" spellcheck="false" required minlength="20" maxlength="512"><div id="githuberror" class="alert error hide" role="alert"></div><div class="row"><button id="forgetgithub" type="button" class="danger compact" onclick="forgetGithubAccess()">Usuń zapisany dostęp</button><button id="cancelgithub" type="button" onclick="closeGithubAccess()">Anuluj</button><button id="savegithub" class="primary" type="submit">Autoryzuj</button></div></form></dialog>
 <script src="/assets/console.js"></script>
 <script>
@@ -102,13 +138,77 @@ function renderInstanceChoices(){let select=$('instanceselect');select.replaceCh
 async function removeInstance(id){let item=instanceItems.find(i=>i.id===id);if(!item||instanceMutations||transfers||actionBusy||editorBusy)return;if(!await ask('Usunąć wpis z panelu?',item.name+' — usunięte zostaną tylko zapisane ustawienia instancji. Nie kasujemy plików ani usług VPS.','Usuń wpis'))return;if(!await mayDiscardEditor())return;instanceMutations++;try{await desktopTerminal.close();await api('/api/instances/remove',{id});activeInstance=null;await loadInstanceChoices();await showTab('dashboard');toast('Usunięto '+item.name+' z panelu. Pliki na VPS nie zostały zmienione.')}catch(e){if(!e?.stale)toast('Nie udało się usunąć wpisu: '+e.message,true)}finally{instanceMutations--}}
 async function loadInstanceChoices(){let data=await api('/api/instances');instanceItems=data.instances||[];let id=activeInstance?.id||safeStorage('rawcraft-instance:'+prefs.host);let item=instanceItems.find(i=>i.id===id)||instanceItems[0];if(item)applyInstance(item)}
 async function switchInstance(id){let item=instanceItems.find(i=>i.id===id);if(!item||item.id===activeInstance?.id)return;if(transfers||actionBusy||editorBusy||accountBusy||instanceMutations||instanceWizardBusy){$('instanceselect').value=activeInstance.id;toast('Poczekaj na zakończenie operacji bieżącej instancji.',true);return}if(!await mayDiscardEditor()){$('instanceselect').value=activeInstance.id;return}await desktopTerminal.close();session++;filesSerial++;logsSerial++;processes=[];metrics={};selectedID=null;selectedKind='minecraft';monitorData={services:[],disks:[]};notificationHistory=[];monitorLast=0;refreshBusy=false;logsBusy=false;paymentsBusy=false;lastLogSnapshot='';pendingLogText=null;logViewKey='';logPaused=false;editPath='';editorChunk=null;editHistory=[];closeEditor(true);$('editor').value='';$('filetbody').replaceChildren();$('backuptbody').replaceChildren();$('backupfolder').textContent='';$('consoleout').textContent='';$('rconreply').replaceChildren();$('rconreply').classList.add('hide');$('terminalout').textContent='';$('filehint').textContent='';$('paymentfacts').replaceChildren();$('paymentavailability').textContent='Status nieznany dla wybranej instancji';$('paymentchecked').textContent='';$('paymenterror').classList.add('hide');$('logerror').classList.add('hide');$('statuserror').classList.add('hide');applyInstance(item);$('path').value=item.serverPath;loadNotificationHistory();renderServices();renderMetrics();await showTab(activeTab);refresh()}
-function wizardRequest(){return {instance:{id:$('newinstanceid').value.trim(),name:$('newinstancename').value.trim(),serverPath:$('newinstancepath').value.trim(),minecraftProcess:$('newinstanceprocess').value.trim(),wwwProcess:'',port:Number($('newinstanceport').value),rconPort:Number($('newinstancercon').value),corePort:Number($('newinstancecore').value),java:$('newinstancejava').value.trim(),ram:Number($('newinstanceram').value),version:$('newinstanceversion').value.trim()},sourceJar:$('newinstancejar').value.trim()}}
-function renderInstancePlan(result,request){let item=request.instance;$('instanceplan').textContent=[result.prepared?'Przygotowano pliki. Serwer pozostaje zatrzymany.':'Plan sprawdzony. Możesz przygotować pliki.',item.name+' ('+item.id+')','Katalog: '+item.serverPath,'Proces PM2: '+item.minecraftProcess,'Port gry: '+item.port+' · RCON: '+item.rconPort+' · API Core: '+item.corePort,'Silnik: '+item.version,'Java: '+item.java+(result.javaVersion?'\n'+result.javaVersion.trim():''),'RAM: '+item.ram+' MB','Baza Core: osobny plik SQLite','Połączenia: natywne transfery Core wymagają osobnej konfiguracji lobby.','EULA: do sprawdzenia i świadomej akceptacji przed startem.'].join('\n')}
-function openInstanceWizard(){if(!connected){toast('Najpierw połącz się z VPS.',true);return}instancePlan=null;let next=instanceItems.some(i=>i.id==='testowy')?'lobby':'testowy';$('newinstanceid').value=next;$('newinstancename').value=next==='lobby'?'Lobby':'Serwer testowy';$('newinstancepath').value=joinPath(prefs.serverPath.replace(/\/[^/]+$/,''),next);$('newinstanceprocess').value='minecraft-'+next;let ports=new Set(instanceItems.flatMap(i=>[i.port,i.rconPort,i.corePort]));let game=25566,rcon=25576;while(ports.has(game))game++;while(ports.has(rcon)||rcon===game)rcon++;$('newinstanceport').value=game;$('newinstancercon').value=rcon;let core=8767;while(ports.has(core)||core===game||core===rcon)core++;$('newinstancecore').value=core;$('instancecreate').classList.add('hide');$('instanceplan').textContent='';$('newinstancejar').value=joinPath(prefs.serverPath,'server.jar');$('instancewizard').showModal()}
+let preparedCatalogInstance=null;
+function catalogSelectedPlugins(){return Array.from(document.querySelectorAll('.catalogplugin:checked'),el=>el.value)}
+function syncCatalogPlugins(changed){
+ const boxes=Object.fromEntries(Array.from(document.querySelectorAll('.catalogplugin'),el=>[el.value,el]));
+ if(changed==='viarewind'&&boxes.viarewind.checked){boxes.viabackwards.checked=true;boxes.viaversion.checked=true}
+ if(changed==='viabackwards'&&boxes.viabackwards.checked)boxes.viaversion.checked=true;
+ if(changed==='viaversion'&&!boxes.viaversion.checked){boxes.viabackwards.checked=false;boxes.viarewind.checked=false}
+ if(changed==='viabackwards'&&!boxes.viabackwards.checked)boxes.viarewind.checked=false;
+}
+document.querySelectorAll('.catalogplugin').forEach(el=>el.addEventListener('change',()=>{syncCatalogPlugins(el.value);instancePlan=null;$('instancecreate').classList.add('hide')}));
+function wizardRequest(){return {instance:{id:$('newinstanceid').value.trim(),name:$('newinstancename').value.trim(),serverPath:$('newinstancepath').value.trim(),minecraftProcess:$('newinstanceprocess').value.trim(),wwwProcess:'',port:Number($('newinstanceport').value),rconPort:Number($('newinstancercon').value),corePort:Number($('newinstancecore').value),java:$('newinstancejava').value.trim(),ram:Number($('newinstanceram').value),version:'Paper 26.3'},plugins:catalogSelectedPlugins()}}
+function renderInstancePlan(result,request){let item=request.instance;$('instanceplan').textContent=[result.prepared?'Paper i pluginy pobrano. Serwer jeszcze nie jest uruchomiony.':'Sprawdzono katalog, Java i porty. Możesz pobrać pliki.',item.name+' ('+item.id+')','Katalog: '+item.serverPath,'Proces PM2: '+item.minecraftProcess,'Port gry: '+item.port+' (25565 pozostaje zajęty przez poprzedni serwer)','Silnik: Paper 26.3 · Java: '+item.java+(result.javaVersion?'\n'+result.javaVersion.trim():''),'RAM: '+item.ram+' MB','Pluginy: '+(request.plugins.length?request.plugins.join(', '):'bez pluginów'),'RCON jest wyłączony; MySQL i plugin RawCore konfigurujemy osobno.','EULA: osobna akceptacja przed startem.'].join('\n')}
+function openInstanceWizard(){
+ if(!connected){toast('Najpierw połącz się z VPS.',true);return}
+ instancePlan=null;preparedCatalogInstance=null;
+ let next='survival',i=2;while(instanceItems.some(x=>x.id===next))next='survival'+i++;
+ $('newinstanceid').value=next;$('newinstancename').value='RawCore Survival';
+ $('newinstancepath').value='/home/'+prefs.user+'/rawcore-servers/'+next;
+ $('newinstanceprocess').value='minecraft-'+next;
+ let ports=new Set(instanceItems.flatMap(x=>[x.port,x.rconPort,x.corePort]));let game=25566;
+ while(ports.has(game))game++;
+ let rcon=25576;while(ports.has(rcon)||rcon===game)rcon++;
+ let core=8767;while(ports.has(core)||core===game||core===rcon)core++;
+ $('newinstanceport').value=game;$('newinstancercon').value=rcon;$('newinstancecore').value=core;
+ $('newinstancejava').value='/opt/rawcore-java25/bin/java';$('newinstanceram').value=4096;
+ document.querySelectorAll('.catalogplugin').forEach(el=>el.checked=true);
+ $('instancecreate').classList.add('hide');$('instanceeulabox').classList.add('hide');
+ $('instanceeulacheck').checked=false;$('instancestart').disabled=false;
+ $('instanceplan').textContent='';
+ $('instancewizard').showModal();
+}
 function closeInstanceWizard(){if(!instanceWizardBusy)$('instancewizard').close()}
 $('instanceform').addEventListener('input',()=>{instancePlan=null;$('instancecreate').classList.add('hide')});
-$('instanceform').addEventListener('submit',async event=>{event.preventDefault();if(instanceWizardBusy)return;instanceWizardBusy=true;try{let request=wizardRequest(),result=await api('/api/instances/prepare',{...request,action:'preview'});instancePlan={request,hash:result.planHash};renderInstancePlan(result,request);$('instancecreate').classList.remove('hide')}catch(error){if(error?.stale)return;$('instanceplan').textContent=error.message}finally{instanceWizardBusy=false}});
-async function prepareInstance(){if(instanceWizardBusy||!instancePlan)return;let plan=instancePlan;instanceWizardBusy=true;$('instancecreate').disabled=true;try{let result=await api('/api/instances/prepare',{...plan.request,action:'create',planHash:plan.hash},125000);renderInstancePlan(result,plan.request);instancePlan=null;$('instancecreate').classList.add('hide');await loadInstanceChoices();toast('Przygotowano osobne pliki. Żaden proces nie został uruchomiony.')}catch(error){if(error?.stale)return;$('instanceplan').textContent=error.message}finally{instanceWizardBusy=false;$('instancecreate').disabled=false}}
+$('instanceform').addEventListener('submit',async event=>{
+ event.preventDefault();if(instanceWizardBusy)return;instanceWizardBusy=true;
+ try{let request=wizardRequest(),result=await api('/api/instances/catalog',{...request,action:'preview'});instancePlan={request,hash:result.planHash};renderInstancePlan(result,request);$('instancecreate').classList.remove('hide');$('instanceeulabox').classList.add('hide')}
+ catch(error){if(!error?.stale)$('instanceplan').textContent=error.message}
+ finally{instanceWizardBusy=false}
+});
+async function prepareInstance(){
+ if(instanceWizardBusy||!instancePlan)return;let plan=instancePlan;instanceWizardBusy=true;
+ $('instancecreate').disabled=true;
+ try{
+  let result=await api('/api/instances/catalog',{...plan.request,action:'create',planHash:plan.hash},315000);
+  renderInstancePlan(result,plan.request);
+  instancePlan=null;$('instancecreate').classList.add('hide');
+  await loadInstanceChoices();
+  let match=instanceItems.find(i=>i.id===plan.request.instance.id);
+  if(!match)throw Error('Pliki zapisano, ale nie znaleziono nowej instancji na liście. Odśwież panel.');
+  preparedCatalogInstance={id:match.id,revision:match.revision};
+  $('instanceeulacheck').checked=false;$('instanceeulabox').classList.remove('hide');
+  toast('Paper i pluginy pobrane. Akceptacja EULA jest wymagana przed startem.');
+ }catch(error){if(!error?.stale)$('instanceplan').textContent=error.message}
+ finally{instanceWizardBusy=false;$('instancecreate').disabled=false}
+}
+async function startPreparedInstance(){
+ if(instanceWizardBusy||!preparedCatalogInstance)return;
+ if(!$('instanceeulacheck').checked){toast('Przeczytaj i zaakceptuj EULA Minecraft.',true);return}
+ if(!await ask('Uruchomić Paper 26.3?','Zarejestrujemy nowy proces w PM2. Upewnij się, że wybrany port jest wolny.','Uruchom'))return;
+ instanceWizardBusy=true;$('instancestart').disabled=true;
+ try{
+  let output=await api('/api/instances/catalog-start',{...preparedCatalogInstance,eulaAccepted:true},80000);
+  let choice=instanceItems.find(i=>i.id===preparedCatalogInstance.id);
+  $('instanceplan').textContent='Serwer został uruchomiony w PM2. '+(output.pm2Saved?'Zapisano listę PM2.':'Uwaga: nie udało się zapisać listy PM2.')+'\nProces: '+preparedCatalogInstance.id;
+  $('instanceeulabox').classList.add('hide');preparedCatalogInstance=null;
+  if(choice)await switchInstance(choice.id);
+  await refresh();
+  toast('Nowy Paper uruchomiony. Sprawdź logi i wersje pluginów.');
+ }catch(e){if(!e?.stale){$('instanceplan').textContent=e.message;toast(e.message,true)}}
+ finally{instanceWizardBusy=false;$('instancestart').disabled=false}
+}
 let renewal=null;
 async function renewSession(){if(!renewal)renewal=fetch('/api/session/renew',{method:'POST',headers:{'X-RAWCRAFT-CSRF':CSRF}}).then(r=>{if(!r.ok)throw Error('Nie można odnowić sesji tego okna.')}).finally(()=>renewal=null);return renewal}
 async function api(path,data,timeout=60000){let controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeout),generation=session,instance=activeInstance,scoped=instanceEndpoints.has(path.split('?')[0]),mutation=scoped&&data!==undefined&&path!='/api/shell';if(mutation)instanceMutations++;let headers={'X-RAWCRAFT-CSRF':CSRF,...(data===undefined?{}:{'Content-Type':'application/json'}),...(scoped&&instance?{'X-RAWCRAFT-Instance':instance.id,'X-RAWCRAFT-Revision':instance.revision||''}:{})};let request=()=>fetch(path,{method:data===undefined?'GET':'POST',headers,body:data===undefined?undefined:JSON.stringify(data),signal:controller.signal});try{let response=await request();if(response.status===403){let problem=await response.clone().json().catch(()=>({}));if(problem.code==='session_expired'){await renewSession();if(scoped&&generation!==session)throw Object.assign(Error('Zmieniono instancję.'),{stale:true});response=await request()}}let type=response.headers.get('content-type')||'',obj=type.includes('json')?await response.json():{error:await response.text()};if(scoped&&generation!==session)throw Object.assign(Error('Zmieniono instancję.'),{stale:true});if(!response.ok||obj.error)throw Error(obj.error||'Błąd HTTP '+response.status);return obj}catch(e){if(e?.stale)return;if(e.name==='AbortError')throw Error('Przekroczono czas oczekiwania. Sprawdź połączenie.');throw e}finally{if(mutation)instanceMutations--;clearTimeout(timer)}}

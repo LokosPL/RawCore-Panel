@@ -1,7 +1,7 @@
 const fs=require('fs'),http=require('http'),assert=require('assert');
 const {chromium}=require('playwright');
 const instances=[{id:'normalny',name:'Serwer główny',serverPath:'/srv/main',minecraftProcess:'main',wwwProcess:'www',port:25565,revision:'main-v1'},{id:'testowy',name:'Serwer testowy',serverPath:'/srv/test',minecraftProcess:'test',wwwProcess:'',port:25566,revision:'test-v1'}];
-let pendingMain=null,requests=[],created=0;
+let pendingMain=null,requests=[],created=0,started=0;
 const settings={host:'192.0.2.10',port:22,user:'minecraft',serverPath:'/srv/main',minecraftProcess:'main',wwwProcess:'www',autoUpdate:false,autoLogin:false,theme:'light',instances};
 const server=http.createServer(async(req,res)=>{
  const url=new URL(req.url,'http://localhost');let body='';for await(const b of req)body+=b;
@@ -18,7 +18,8 @@ const server=http.createServer(async(req,res)=>{
   case '/api/payments/status':out={version:1,paymentsAvailable:false,observedAt:Date.now(),reason:'TEST_MODE'};break;
   case '/api/backups':out={folder:instance.serverPath+'/backup',items:[]};break;
   case '/api/minecraft/command':out={output:id+' reply'};break;
-  case '/api/instances/prepare':if(JSON.parse(body).action==='create')created++;out={planHash:'reviewed',prepared:JSON.parse(body).action==='create',started:false,database:'SQLite'};break;
+  case '/api/instances/catalog':if(JSON.parse(body).action==='create'){created++;const item=JSON.parse(body).instance;instances.push({...item,revision:'prepared-v1'})}out={planHash:'reviewed',prepared:JSON.parse(body).action==='create',started:false,javaVersion:'openjdk 25'};break;
+  case '/api/instances/catalog-start':started++;out={started:true,pm2Saved:true};break;
  }
  res.end(JSON.stringify(out));
 });
@@ -31,6 +32,6 @@ const server=http.createServer(async(req,res)=>{
  assert(pendingMain);pendingMain();await page.waitForTimeout(200);assert((await page.locator('#filetbody').innerText()).includes('testowy.txt'));assert(!(await page.locator('#filetbody').innerText()).includes('normalny.txt'));
  await page.click('#nav-console');await page.fill('#mccommand','core motd status');await page.click('#sendmc');await page.locator('#rconreply').filter({hasText:'testowy reply'}).waitFor();let rcon=requests.find(r=>r.url==='/api/minecraft/command');assert.equal(rcon.id,'testowy');assert.equal(rcon.body.path,'/srv/test');
  await page.click('#nav-backups');await page.locator('#backupfolder').filter({hasText:'/srv/test/backup'}).waitFor();
- await page.getByRole('button',{name:'+ Nowa instancja',exact:true}).click();await page.fill('#newinstanceid','lobby');await page.fill('#newinstancename','Lobby');await page.fill('#newinstancepath','/srv/lobby');await page.fill('#newinstanceprocess','lobby');await page.fill('#newinstanceversion','Paper 26.3');await page.click('#instancepreview');await page.locator('#instancecreate').waitFor({state:'visible'});await page.click('#instancecreate');await page.waitForFunction(()=>document.querySelector('#instanceplan').textContent.includes('Przygotowano pliki'));assert.equal(created,1);assert(!requests.some(r=>r.url==='/api/action'));
+ await page.getByRole('button',{name:'+ Nowa instancja',exact:true}).click();await page.fill('#newinstanceid','lobby');await page.fill('#newinstancename','Lobby');await page.fill('#newinstancepath','/srv/lobby');await page.fill('#newinstanceprocess','lobby');await page.click('#instancepreview');await page.locator('#instancecreate').waitFor({state:'visible'});await page.click('#instancecreate');await page.waitForFunction(()=>document.querySelector('#instanceplan').textContent.includes('Paper i pluginy pobrano'));assert.equal(created,1);assert.equal(started,0);await page.locator('#instanceeulabox').waitFor({state:'visible'});
  await page.screenshot({path:'preview-multi-instance.png',fullPage:true});assert.deepEqual(errors,[]);await browser.close();server.close();console.log('PASS: instance switch clears views; delayed old file response ignored; RCON/backups bind to selected instance; reviewed wizard never starts PM2');
 })().catch(e=>{console.error(e);process.exit(1)});
