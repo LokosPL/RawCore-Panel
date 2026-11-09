@@ -1,8 +1,7 @@
-# RAWCRAFT Control 1.5.2 — RawCore Survival w panelu
+# RAWCRAFT Control 1.5.3 — metryki Paper/systemd
 
-- Wykrywanie istniejącej usługi `rawcore-survival.service` na VPS przez `systemctl show`, bez instalowania drugiej kopii Minecrafta.
-- Osobna karta **RawCore Survival** na pulpicie, status online/offline, PID i pamięć RAM, gdy raportuje ją systemd.
-- Bezpieczne, jawne akcje Start, Stop i Restart dla jednej konkretnej usługi, z potwierdzeniem działań przerywających rozgrywkę.
-- Podgląd ostatnich wpisów `journalctl` w oknie aplikacji.
-- Bez zmian w Nginx, PM2, MySQL, plikach Minecrafta i stronie WWW. Usługa pozostaje zarządzana przez systemd.
-- W razie braku sudo operacje administracyjne zgłaszają błąd uprawnień zamiast uruchamiać drugą instancję.
+- Pełniejsza karta RawCore Survival: rzeczywiste CPU JVM (delta czasu procesora), RAM systemd, rozmiar folderu /opt/rawcore-survival, PID, czas pracy JVM i tryb.
+- CPU pokazuje obciążenie w % jednego rdzenia; może przekroczyć 100% na procesorach wielordzeniowych.
+- Skan katalogu serwera jest buforowany przez 60 sekund, aby nie obciążać dysku VPS co 3 sekundy.
+- W razie braku dostępu do pomiaru wyświetla „Brak pomiaru” zamiast fałszywego zera.
+- Start/Stop/Restart oraz odczyt logów systemd pozostają bez zmian. Bez modyfikowania plików Minecrafta, WWW i bazy.
