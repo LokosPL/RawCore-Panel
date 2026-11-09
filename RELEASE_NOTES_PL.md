@@ -1,7 +1,7 @@
-# RAWCRAFT Control 1.5.7 — menedżer plików
+# RAWCRAFT Control 1.5.8 — przesyłanie całych folderów
 
-- Foldery można pobierać jako ZIP, a pliki binarne i JAR do komputera bez opuszczania panelu.
-- Nowy mechanizm pobierania obsługuje strumień i okno zapisu (gdy system je udostępnia), z awaryjną obsługą małych plików.
-- Błędy pobierania (brak pliku, uprawnień lub problem z SSH) zgłaszane są zamiast pustego pobranego pliku.
-- Foldery wraz z zawartością można usuwać po wyraźnym potwierdzeniu. Zabezpieczono katalog główny instancji oraz symlinki.
-- Pobieranie i usuwanie pozostają ograniczone do wybranej instancji; WWW, PM2 i MySQL nie są modyfikowane.
+- Menedżer plików: nowy przycisk „Prześlij folder” obok przesyłania pojedynczych plików.
+- Przesyła pliki i podfoldery na VPS z zachowaniem struktury oraz pokazuje postęp i liczbę przesłanych plików.
+- Potwierdzenie przed zastąpieniem istniejących plików, dotychczasowy atomowy upload z kopią .rawcraft.bak pozostaje aktywny.
+- Walidacja ścieżek względnych i serwerowe zabezpieczenie tworzenia podfolderów przed wyjściem poza wybraną instancję oraz symlinkami.
+- Uwaga: przeglądarka może pominąć całkowicie puste foldery. WWW, PM2 i MySQL bez zmian.

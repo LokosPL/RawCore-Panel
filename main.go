@@ -431,6 +431,7 @@ func handleMkdir(w http.ResponseWriter, r *http.Request) {
 	}
 	var req struct {
 		Path string `json:"path"`
+        Parents bool `json:"parents"`
 	}
 	if err := fromJSON(r, &req); err != nil {
 		bad(w, err)
@@ -442,7 +443,12 @@ func handleMkdir(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 25*time.Second)
 	defer cancel()
-	_, err := runRemote(ctx, c, "mkdir -- "+quote(req.Path))
+    remote:="mkdir -- "+quote(req.Path)
+    if req.Parents {
+        instance,err:=requestInstance(r);if err!=nil{bad(w,err);return}
+        remote=remPython(mkdirTreePython,req.Path,instance.ServerPath)
+    }
+	_, err := runRemote(ctx, c, remote)
 	if err != nil {
 		bad(w, err)
 		return
