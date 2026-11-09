@@ -1,0 +1,201 @@
+name: Test and build Windows app
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  test:
+    if: ${{ !github.event.deleted && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository) }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: go mod tidy
+      - name: Source checkpoint
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          gofmt -w *.go
+          zip -q source-checkpoint.zip *.go go.mod go.sum
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: Source-checkpoint
+          path: source-checkpoint.zip
+      - run: go vet ./...
+      - run: go test -race ./...
+      - name: Verify native window and saved credentials
+        if: matrix.os == 'windows-latest'
+        run: go test -v -run 'TestNativeWindowOpensAndCloses|TestRememberedSSHSecretIsEncryptedAndBoundToProfile' .
+  ui:
+    if: ${{ !github.event.deleted && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/prepare-terminal.cjs
+      - run: python3 tests/test_atomic_upload.py
+      - run: node tests/console.cjs
+      - run: node tests/terminal-latency.cjs
+      - run: node tests/ui.cjs
+      - run: node tests/instances.cjs
+      - run: python3 tests/test_instance_prepare.py
+      - run: node tests/update-window.cjs
+      - run: python3 tests/test_remote_editor.py
+      - run: python3 tests/test_security.py
+      - run: python3 tests/test_file_actions.py
+      - run: python3 tests/test_monitor.py
+      - run: python3 tests/test_payments.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Panel-previews
+          path: preview-*.png
+  build:
+    needs: [test, ui]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - run: go mod tidy
+      - name: Prepare offline terminal
+        run: node scripts/prepare-terminal.cjs
+      - name: Embed application icon
+        run: go run github.com/akavel/rsrc@v0.10.2 -ico assets/app.ico -o resource_windows_amd64.syso
+      - name: Build GUI executable (no console)
+        run: go build -trimpath -ldflags="-H=windowsgui -s -w" -o dist/RAWCRAFT-Control.exe .
+      - name: Prepare checksums and documentation
+        shell: pwsh
+        run: |
+          Copy-Item README_PL.txt,THIRD_PARTY_NOTICES.txt dist/
+          $hash = (Get-FileHash dist/RAWCRAFT-Control.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  RAWCRAFT-Control.exe" | Set-Content -Encoding ascii dist/SHA256SUMS
+      - name: Prepare pinned Inno Setup compiler
+        shell: pwsh
+        run: |
+          $bootstrap = Join-Path $env:RUNNER_TEMP 'innosetup-6.4.3.exe'
+          Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-6_4_3/innosetup-6.4.3.exe' -OutFile $bootstrap
+          if ((Get-FileHash $bootstrap -Algorithm SHA256).Hash.ToLower() -ne 'f3c42116542c4cc57263c5ba6c4feabfc49fe771f2f98a79d2f7628b8762723b') { throw 'Compiler checksum mismatch' }
+          $compilerDir = Join-Path $env:RUNNER_TEMP 'InnoCompiler'
+          $p = Start-Process $bootstrap -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR=`"$compilerDir`"" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw 'Cannot prepare Inno Setup compiler' }
+          "RAWCRAFT_ISCC=$compilerDir\ISCC.exe" >> $env:GITHUB_ENV
+      - name: Build Windows installer
+        shell: pwsh
+        run: ./scripts/build-installer.ps1
+      - name: Fetch pinned previous release for real updater compatibility
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $previousDir = Join-Path $env:RUNNER_TEMP 'PreviousControl'
+          New-Item -ItemType Directory -Force $previousDir | Out-Null
+          gh release download v1.4.2 --pattern RAWCRAFT-Control.exe --dir $previousDir
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch previous updater for compatibility test' }
+          $previous = Join-Path $previousDir 'RAWCRAFT-Control.exe'
+          if ((Get-FileHash $previous -Algorithm SHA256).Hash.ToLower() -ne '3582ace4b858d4224ef2764dbb2288945e840e808e961616a85390fd21e930dc') { throw 'Previous release checksum mismatch' }
+          "RAWCRAFT_PREVIOUS_EXE=$previous" >> $env:GITHUB_ENV
+      - name: Verify custom installation, update and uninstall
+        shell: pwsh
+        run: ./scripts/test-installer.ps1
+      - name: Package complete sources and provenance
+        shell: pwsh
+        run: |
+          git -c core.autocrlf=false archive --format=zip --output=dist/RAWCRAFT-Control-1.4.9-src.zip HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Source archive failed' }
+          git rev-parse HEAD | Set-Content -Encoding ascii dist/COMMIT.txt
+          Copy-Item INTEGRATION_PL.md,RELEASE_NOTES_PL.md dist/
+          Get-ChildItem dist -File | Where-Object { $_.Name -ne 'SHA256SUMS' } | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)"
+          } | Set-Content -Encoding ascii dist/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RAWCRAFT-Control-Windows-x64
+          path: dist/*
+          retention-days: 30
+  release:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/release/multi-instance-1.4.9-20261105') || startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check tag matches application version
+        run: |
+          version=$(sed -n 's/^const appVersion = "\([^"]*\)"/\1/p' updater.go)
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then test "$GITHUB_REF_NAME" = "v$version"; fi
+          echo "RELEASE_TAG=v$version" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: RAWCRAFT-Control-Windows-x64
+          path: dist
+      - name: Stage, verify and publish stable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(tr -d '\r\n' < dist/COMMIT.txt)" = "$GITHUB_SHA"
+          python3 - <<'PY'
+          import hashlib, pathlib
+          folder=pathlib.Path('dist');seen=set()
+          for line in (folder/'SHA256SUMS').read_text().splitlines():
+              digest,name=line.split(None,1);name=name.strip()
+              assert name not in seen and pathlib.Path(name).name==name
+              assert hashlib.sha256((folder/name).read_bytes()).hexdigest()==digest
+              seen.add(name)
+          assert seen=={p.name for p in folder.iterdir() if p.is_file()}-{'SHA256SUMS'}
+          PY
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG"; then
+            echo "Tag exists; refusing to replace it."
+            exit 1
+          else
+            code=$?; test "$code" -eq 2
+          fi
+          gh release create "$RELEASE_TAG" dist/* --target "$GITHUB_SHA" --draft --title "RAWCRAFT Control $RELEASE_TAG" --notes-file RELEASE_NOTES_PL.md
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > releases.json
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          candidates=[r for r in json.load(open('releases.json')) if r['tag_name']==os.environ['RELEASE_TAG']]
+          assert len(candidates)==1
+          release=candidates[0]
+          assert release['draft'] and not release['prerelease'] and release['target_commitish']==os.environ['GITHUB_SHA']
+          expected={p.name:p for p in pathlib.Path('dist').iterdir() if p.is_file()}
+          actual={a['name']:a for a in release['assets']}
+          assert set(actual)==set(expected)
+          for name,path in expected.items():
+              assert actual[name]['digest']=='sha256:'+hashlib.sha256(path.read_bytes()).hexdigest(),name
+              assert actual[name]['size']==path.stat().st_size,name
+          pathlib.Path('release-id.txt').write_text(str(release['id']))
+          json.dump({'draft':False,'make_latest':'true'},open('publish.json','w'))
+          PY
+          release_id=$(cat release-id.txt)
+          gh api --method PATCH "repos/$GITHUB_REPOSITORY/releases/$release_id" --input publish.json > published.json
+          gh api "repos/$GITHUB_REPOSITORY/releases/latest" > latest.json
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" > tag.json
+          python3 - <<'PY'
+          import json,os
+          release=json.load(open('latest.json'))
+          assert release['tag_name']==os.environ['RELEASE_TAG'] and not release['draft'] and not release['prerelease']
+          assert json.load(open('tag.json'))['object']['sha']==os.environ['GITHUB_SHA']
+          print('PASS: stable updater channel advertises exact tested commit')
+          PY
