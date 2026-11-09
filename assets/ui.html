@@ -350,7 +350,7 @@ document.addEventListener('pointerdown',e=>{if(!$('filemenu').contains(e.target)
 async function deleteFile(path,revision,directory=false){
  if(editorBusy&&editPath===path){toast('Poczekaj na zakończenie operacji edytora.',true);return}
  if(!revision){toast('Odśwież katalog i spróbuj ponownie.',true);return}
- if(directory&&path.replace(/\\/$/,'')===activeInstance?.serverPath?.replace(/\\/$/,'')){toast('Nie można usunąć całego katalogu serwera.',true);return}
+ if(directory&&path===activeInstance?.serverPath){toast('Nie można usunąć całego katalogu serwera.',true);return}
  const title=directory?'Usunąć folder wraz z całą zawartością?':'Usunąć plik z VPS?';
  const description=directory?path+' — zostaną bezpowrotnie usunięte wszystkie pliki, podfoldery i światy znajdujące się w tym folderze. Zatrzymaj serwer przed usuwaniem aktywnych danych.':path+' — usunięcie jest trwałe.'+(editPath===path?' Otwarty edytor zostanie zamknięty.':'');
  if(!await ask(title,description,directory?'Usuń folder i zawartość':'Usuń plik'))return;
