@@ -86,9 +86,12 @@ func enrichRawcoreCPU(ctx context.Context,c Credentials,s *rawcoreSystemdState) 
     if len(later)!=2{return}
     ticks,start,err:=parseRawcoreProcStat(parts[0]);if err!=nil{return}
     hz,err:=strconv.ParseUint(strings.TrimSpace(later[1]),10,64);if err!=nil||hz==0{return}
-    uptime,err:=strconv.ParseFloat(strings.Fields(later[0])[0],64)
-    if err==nil&&uptime>=float64(start)/float64(hz) {
-        s.UptimeSec=uint64(uptime-float64(start)/float64(hz))
+    uptimeFields:=strings.Fields(later[0])
+    if len(uptimeFields)>0 {
+        uptime,err:=strconv.ParseFloat(uptimeFields[0],64)
+        if err==nil&&uptime>=float64(start)/float64(hz) {
+            s.UptimeSec=uint64(uptime-float64(start)/float64(hz))
+        }
     }
     key:=fmt.Sprintf("%s:%d:%s:%d:%d",c.Host,c.Port,c.User,s.PID,start)
     s.CPUPercent,s.CPUAvailable=rawcoreCPUSample(key,ticks,time.Now(),hz)

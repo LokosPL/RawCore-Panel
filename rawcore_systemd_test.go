@@ -1,5 +1,5 @@
 package main
-import ("testing";"time";"math")
+import ("testing";"time";"math";"strings")
 func TestParseRawcoreSystemdStatus(t *testing.T) {
     s:=parseRawcoreSystemdStatus("LoadState=loaded\nActiveState=active\nSubState=running\nMainPID=102079\nMemoryCurrent=321098765\n")
     if !s.Installed||s.ActiveState!="active"||s.SubState!="running"||s.PID!=102079||s.MemoryBytes!=321098765 {t.Fatalf("%+v",s)}
@@ -8,7 +8,7 @@ func TestParseRawcoreSystemdStatus(t *testing.T) {
 }
 
 func TestRawcoreProcessCounters(t *testing.T) {
-    raw:="42 (Java Main (Paper)) S 0 0 0 0 0 0 0 0 0 0 0 1000 500 0 0 0 0 0 0 12345 0 0 0"
+    raw:="42 (Java Main (Paper)) S "+strings.Repeat("0 ",10)+"1000 500 "+strings.Repeat("0 ",6)+"12345 0 0 0"
     ticks,start,err:=parseRawcoreProcStat(raw)
     if err!=nil||ticks!=1500||start!=12345{t.Fatalf("ticks=%d start=%d err=%v",ticks,start,err)}
     rawcoreCPU.Lock();rawcoreCPU.Key="";rawcoreCPU.At=time.Time{};rawcoreCPU.Ticks=0;rawcoreCPU.Unlock()
