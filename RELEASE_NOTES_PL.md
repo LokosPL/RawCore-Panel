@@ -1,7 +1,8 @@
-# RAWCRAFT Control 1.5.1 — czyszczenie starych instancji
+# RAWCRAFT Control 1.5.2 — RawCore Survival w panelu
 
-- Dodano przycisk **Usuń z panelu** do zapisanych instancji Minecraft, z potwierdzeniem.
-- Usuwanie dotyczy wyłącznie profilu aplikacji na Windows: nie usuwa plików, baz ani usług na VPS.
-- Po usunięciu wszystkich instancji zostaje tryb VPS/SSH z katalogiem domowym, dzięki czemu wieloliniowe komendy nadal działają, nawet jeśli usunięto dawne katalogi Minecraft.
-- Zachowano działającą konsolę SSH, edytor wieloliniowy, ustawienia WWW i dotychczasową obsługę aktualizacji.
-- Zmiany nie uruchamiają ani nie instalują serwera Minecraft automatycznie.
+- Wykrywanie istniejącej usługi `rawcore-survival.service` na VPS przez `systemctl show`, bez instalowania drugiej kopii Minecrafta.
+- Osobna karta **RawCore Survival** na pulpicie, status online/offline, PID i pamięć RAM, gdy raportuje ją systemd.
+- Bezpieczne, jawne akcje Start, Stop i Restart dla jednej konkretnej usługi, z potwierdzeniem działań przerywających rozgrywkę.
+- Podgląd ostatnich wpisów `journalctl` w oknie aplikacji.
+- Bez zmian w Nginx, PM2, MySQL, plikach Minecrafta i stronie WWW. Usługa pozostaje zarządzana przez systemd.
+- W razie braku sudo operacje administracyjne zgłaszają błąd uprawnień zamiast uruchamiać drugą instancję.

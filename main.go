@@ -601,6 +601,8 @@ func main() {
 		http.ServeContent(w, r, "logo.png", time.Time{}, bytes.NewReader(logo))
 	})
 	mux.HandleFunc("/api/instances", requireAuth(handleInstances))
+    mux.HandleFunc("/api/rawcore-service", requireAuth(handleRawcoreService))
+    mux.HandleFunc("/api/rawcore-logs", requireAuth(handleRawcoreLogs))
     mux.HandleFunc("/api/instances/remove", route("POST", handleRemoveInstance))
     mux.HandleFunc("/api/instances/prepare",route("POST",handlePrepareInstance))
     mux.HandleFunc("/api/security", requireAuth(handleSecurity))
