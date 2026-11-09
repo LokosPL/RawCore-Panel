@@ -35,7 +35,13 @@ func instanceRevision(p Preferences,s ServerInstance) string {
 }
 func normalizedInstances(p Preferences) []ServerInstance {
     items:=append([]ServerInstance(nil),p.Instances...)
-    if len(items)==0 {items=[]ServerInstance{{ID:"normalny",Name:"Serwer główny",ServerPath:p.ServerPath,MinecraftProcess:p.MinecraftProcess,WWWProcess:p.WWWProcess}}}
+    if len(items)==0 {
+        if p.ServerPath=="/home/"+p.User {
+            items=[]ServerInstance{{ID:"vps",Name:"VPS / SSH",ServerPath:p.ServerPath,MinecraftProcess:p.MinecraftProcess,WWWProcess:p.WWWProcess}}
+        } else {
+            items=[]ServerInstance{{ID:"normalny",Name:"Serwer główny",ServerPath:p.ServerPath,MinecraftProcess:p.MinecraftProcess,WWWProcess:p.WWWProcess}}
+        }
+    }
     for i:=range items{items[i].Revision=instanceRevision(p,items[i])};return items
 }
 func validateInstances(items []ServerInstance) error {
@@ -106,4 +112,29 @@ root=os.path.realpath(sys.argv[1]);candidate=os.path.realpath(sys.argv[2]);backu
 inside=os.path.commonpath((root,candidate))==root
 archive=os.path.dirname(candidate)==backup and os.path.basename(candidate).startswith(os.path.basename(root)+'-') and candidate.endswith('.tar.gz')
 if not inside and not archive: raise SystemExit('Ścieżka prowadzi poza wybraną instancję')`,s.ServerPath,candidate)+" && "
+}
+
+ // handleRemoveInstance removes only a local saved entry. It never deletes anything on VPS.
+func handleRemoveInstance(w http.ResponseWriter, r *http.Request) {
+    if r.Method!="POST" {http.Error(w,"Method",405);return}
+    var req struct { ID string `json:"id"` }
+    if e:=fromJSON(r,&req);e!=nil{bad(w,e);return}
+    settings.Lock()
+    p:=settings.Prefs
+    at:=-1
+    for i,item:=range p.Instances {if item.ID==req.ID {at=i;break}}
+    if at<0 {settings.Unlock();bad(w,errors.New("Nie znaleziono zapisanej instancji"));return}
+    p.Instances=append(append([]ServerInstance{},p.Instances[:at]...),p.Instances[at+1:]...)
+    if len(p.Instances)==0 {
+        // Keep an SSH-only workspace when both old Minecraft servers were deleted.
+        p.ServerPath="/home/"+p.User
+        p.MinecraftProcess="minecraft"
+        if p.WWWProcess=="" {p.WWWProcess="www"}
+    }
+    if e:=writePreferences(p);e!=nil{settings.Unlock();bad(w,e);return}
+    settings.Prefs=p
+    items:=normalizedInstances(p)
+    settings.Unlock()
+    closeShell()
+    ok(w,map[string]any{"instances":items})
 }
