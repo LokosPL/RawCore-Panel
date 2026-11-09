@@ -416,6 +416,12 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	size,e:=strconv.ParseInt(r.URL.Query().Get("size"),10,64);if e!=nil||size<0{bad(w,errors.New("Niepoprawny rozmiar przesyłanego pliku"));return}
  remote := remPython(remotefiles.Upload,p,"",strconv.FormatInt(size,10))
+ if r.URL.Query().Get("folder")=="1" {
+  instance,err:=requestInstance(r);if err!=nil{bad(w,err);return}
+  // Recreate/validate the parent directory immediately before staging
+  // each file; it may have disappeared since the folder upload began.
+  remote=remPython(remotefiles.Upload,p,"",strconv.FormatInt(size,10),instance.ServerPath)
+ }
 	if err := streamRemote(ctx, c, remote, part, io.Discard); err != nil {
 		bad(w, err)
 		return

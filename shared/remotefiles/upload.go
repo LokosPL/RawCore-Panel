@@ -3,6 +3,23 @@ package remotefiles
 // disconnected upload leaves the original intact; existing mode/owner survive.
 const Upload = `import os,sys,stat,tempfile,shutil,json,fcntl
 p=os.path.abspath(sys.argv[1]);expected=sys.argv[2];expected_size=int(sys.argv[3])
+def ensure_folder_parent():
+ root=os.path.realpath(sys.argv[4])
+ if root=='/' or not os.path.isdir(root):raise SystemExit('Nieprawidłowy katalog instancji')
+ parent=os.path.dirname(p)
+ if os.path.commonpath((root,parent))!=root:raise SystemExit('Plik musi należeć do wybranej instancji')
+ rel=os.path.relpath(parent,root)
+ current=root
+ if rel!='.':
+  for part in rel.split(os.sep):
+   if part in ('','.','..'):raise SystemExit('Niepoprawna ścieżka folderu')
+   current=os.path.join(current,part)
+   if os.path.islink(current):raise SystemExit('Folder prowadzi przez dowiązanie symboliczne')
+   try:os.mkdir(current,0o755)
+   except FileExistsError:pass
+   if os.path.islink(current) or not os.path.isdir(current):raise SystemExit('Folder docelowy nie istnieje lub nie jest katalogiem')
+   if os.path.commonpath((root,os.path.realpath(current)))!=root:raise SystemExit('Folder wychodzi poza instancję')
+if len(sys.argv)>4 and sys.argv[4]:ensure_folder_parent()
 if os.path.islink(p): raise SystemExit('Zastępowanie dowiązań jest wyłączone. Wybierz plik docelowy.')
 version=lambda s:f'{s.st_dev}:{s.st_ino}:{s.st_size}:{s.st_mtime_ns}:{s.st_ctime_ns}'
 def current():

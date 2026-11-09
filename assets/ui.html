@@ -389,10 +389,10 @@ function safeUploadRelativePath(value){
  if(segments.some(segment=>!segment||segment==='.'||segment==='..'||segment.includes(':')))throw Error('Niepoprawna ścieżka w folderze.');
  return segments.join('/')
 }
-function uploadSingle(file,target,instance,generation,onProgress){
+function uploadSingle(file,target,instance,generation,onProgress,folderUpload=false){
  return new Promise((resolve,reject)=>{
   let xhr=new XMLHttpRequest();
-  xhr.open('POST','/api/upload?path='+encodeURIComponent(target)+'&size='+file.size);
+  xhr.open('POST','/api/upload?path='+encodeURIComponent(target)+'&size='+file.size+(folderUpload?'&folder=1':''));
   xhr.setRequestHeader('X-RAWCRAFT-CSRF',CSRF);
   if(instance){xhr.setRequestHeader('X-RAWCRAFT-Instance',instance.id);xhr.setRequestHeader('X-RAWCRAFT-Revision',instance.revision||'')}
   xhr.timeout=45*60*1000;
@@ -441,7 +441,8 @@ async function uploadFolder(e){
  }catch(error){toast(error.message,true);input.value='';return}
  let total=plan.reduce((sum,x)=>sum+x.file.size,0);
  let folder=plan[0].relative.split('/')[0];
- if(!await ask('Przesłać cały folder?',folder+' — '+plan.length+' plików ('+bytes(total)+') do '+joinPath(root,folder)+'. Struktura podfolderów zostanie zachowana, a istniejące pliki o tych samych nazwach zostaną zastąpione. Puste foldery bez plików mogą być pominięte przez systemowy wybór folderu.','Prześlij folder')){input.value='';return}
+ if(root.split('/').filter(Boolean).pop()===folder){toast('Jesteś już w katalogu '+folder+'. Przejdź folder wyżej, aby nie utworzyć '+folder+'/'+folder+'.',true);input.value='';return}
+ if(!await ask('Przesłać cały folder?',folder+' — '+plan.length+' plików ('+bytes(total)+') do '+joinPath(root,folder)+'. Struktura podfolderów zostanie zachowana, a istniejące pliki o tych samych nazwach zostaną zastąpione. Jeśli przesyłasz świat Minecraft, najpierw zatrzymaj serwer. Puste foldery bez plików mogą być pominięte.','Prześlij folder')){input.value='';return}
  transfers++;input.disabled=true;$('uploadfile').disabled=true;
  $('uploadprogress').classList.remove('hide');$('uploadprogress').value=0;
  let completed=0,sentBytes=0;
@@ -458,7 +459,7 @@ async function uploadFolder(e){
    $('filehint').textContent='Przesyłanie '+(completed+1)+'/'+plan.length+': '+entry.relative;
    await uploadSingle(entry.file,entry.target,instance,generation,(loaded)=>{
     $('uploadprogress').value=total?100*(sentBytes+loaded)/total:100*(completed/plan.length)
-   });
+   },true);
    completed++;sentBytes+=entry.file.size;
    $('uploadprogress').value=total?100*sentBytes/total:100*completed/plan.length;
   }
