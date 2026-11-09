@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const appVersion = "1.4.9"
+const appVersion = "1.5.0"
 const updateRepository = "LokosPL/RawCore-Panel"
 const updateAsset = "RAWCRAFT-Control.exe"
 const maxUpdateSize int64 = 256 << 20
@@ -146,7 +146,7 @@ func githubRequest(ctx context.Context, rawURL, token, accept string) (*http.Res
 }
 
 type updateAccessError struct{ Code int }
-func (e *updateAccessError) Error() string {return fmt.Sprintf("GitHub HTTP %d: token jest nieważny, wygasł albo nie ma dostępu do repozytorium RawCore-Control (Contents: Read-only).",e.Code)}
+func (e *updateAccessError) Error() string {return fmt.Sprintf("GitHub HTTP %d: token jest nieważny, wygasł albo nie ma dostępu do repozytorium RawCore-Panel (Contents: Read-only).",e.Code)}
 func updateFailure(e error){var access *updateAccessError;if errors.As(e,&access){setUpdate("access_denied",e.Error());return};setUpdate("error",e.Error())}
 
 func checksumFor(data []byte, name string) (string, error) {
