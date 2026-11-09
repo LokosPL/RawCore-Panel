@@ -90,7 +90,7 @@ func runShellBatch(ctx context.Context, client *ssh.Client, directory, source st
 	session.Stdin = strings.NewReader(script)
 	// A separate, noninteractive shell avoids terminal line buffering/truncation
 	// when a user pastes many commands. It does not change the open PTY's cwd.
-	command := "cd -- " + quote(directory) + " && exec /bin/bash -se"
+	command := "if [ -d " + quote(directory) + " ]; then cd -- " + quote(directory) + "; else cd; fi; exec /bin/bash -se"
 	if err := session.Start(command); err != nil {
 		return shellBatchResult{}, err
 	}
