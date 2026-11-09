@@ -52,4 +52,20 @@ class MonitorTests(unittest.TestCase):
    p=Path(d);req={'processes':[{'pm_id':i,'name':str(i),'pm2_env':{'pm_cwd':d,'pm_err_log_path':str(p)}} for i in [1,2]],'serverPath':d,'minecraftProcess':'mc'}
    out=json.loads(subprocess.check_output(['python3','-c',SCRIPT,json.dumps(req)],text=True))
    self.assertEqual(len(out['disks']),1);self.assertTrue(out['services'][0]['issues'])
+
+ def test_old_undated_error_is_not_revived_by_newer_timestamped_warning(self):
+  with tempfile.TemporaryDirectory() as d:
+   now=datetime.datetime.now().astimezone()
+   stale=now-datetime.timedelta(minutes=40)
+   recent=now-datetime.timedelta(seconds=2)
+   old_error='Failed to download original jar\njava.nio.file.FileSystemException: /home/user/rawcore-servers/survival/cache: Read-only file system\n'
+   lines=old_error+stale.isoformat()+' ServerMain WARN Advanced terminal features are not available in this environment\n'+recent.isoformat()+' ServerMain WARN Advanced terminal features are not available in this environment\n'
+   result=self.run_monitor(Path(d),lines,started=time.time()-25)
+   self.assertEqual(result['services'][0]['errors'],[])
+ def test_recent_undated_stacktrace_after_dated_error_is_still_detected(self):
+  with tempfile.TemporaryDirectory() as d:
+   now=datetime.datetime.now().astimezone().isoformat()
+   lines=now+' [ERROR]: Failed to download original jar\njava.nio.file.FileSystemException: Cannot create cache\n'
+   result=self.run_monitor(Path(d),lines)
+   self.assertEqual(len(result['services'][0]['errors']),2)
 if __name__=='__main__':unittest.main()

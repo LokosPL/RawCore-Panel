@@ -26,7 +26,7 @@ def stamp(line,mtime):
  if m:
   today=datetime.datetime.fromtimestamp(mtime);d=datetime.datetime.combine(today.date(),datetime.time.fromisoformat(m[1])).timestamp()
   return d-86400 if d>mtime+60 else d
- return mtime
+ return None
 def scan_logs(p):
  env=p.get('pm2_env',{});started=float(env.get('pm_uptime') or 0)/1000;events={};issues=[]
  paths=list(dict.fromkeys(x for x in [env.get('pm_out_log_path'),env.get('pm_err_log_path'),os.path.join(server,'logs','latest.log') if p['name']==request['minecraftProcess'] else None] if x))
@@ -37,9 +37,20 @@ def scan_logs(p):
     if s.st_mtime<max(started,now-900): continue
     offset=max(0,s.st_size-131072);f.seek(offset);data=f.read(131072)
     if offset: data=data.partition(b'\n')[2]
+   # Old undated stack traces must not inherit a new file modification time.
+   # PM2 appends current warnings to the same historic stderr log.
+   parsed=[]
    for raw in data.decode('utf-8',errors='replace').splitlines():
-    line=ansi.sub('',raw).strip();when=stamp(line,s.st_mtime)
-    if when<max(started,now-900) or not level.search(line): continue
+    line=ansi.sub('',raw).strip()
+    parsed.append((line,stamp(line,s.st_mtime)))
+   has_timestamps=any(when is not None for _,when in parsed)
+   last_dated=None
+   for line,explicit_when in parsed:
+    if explicit_when is not None:last_dated=explicit_when
+    # Undated stack traces may only inherit a preceding event timestamp.
+    # Preserve previous behavior when a log has no dates at all.
+    when=explicit_when if explicit_when is not None else (last_dated if has_timestamps else s.st_mtime)
+    if when is None or when<max(started,now-900) or not level.search(line): continue
     # Keep distinct incidents, collapse periodic repetitions and the same entry in PM2/latest.log.
     message=re.sub(r'\[\d\d:\d\d:\d\d ([^\]]+)\]',r'[\1]',line)
     message=re.sub(r'^\d{4}-\d\d-\d\d[T ][\d:.]+(?:\s*[+-]\d\d:\d\d)?[ :]*','',message)[:700]
