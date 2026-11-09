@@ -1,9 +1,7 @@
-# RAWCRAFT Control 1.5.4 — kreator Paper i pluginy
+# RAWCRAFT Control 1.5.5 — poprawka pobierania Paper
 
-- Nowy kreator Paper 26.3 z wyborem ViaVersion, ViaBackwards, ViaRewind i WorldEdit.
-- Automatyczne pobieranie wyłącznie stabilnych wersji kompatybilnych z Paper 26.3 przez oficjalne API PaperMC i Modrinth; sprawdzanie sum SHA-512/SHA-256.
-- Weryfikacja Java 25, portów, katalogów oraz kolizji procesów; pobieranie do osobnego katalogu tymczasowego bez nadpisywania istniejących światów.
-- Osobny krok „Akceptuję EULA i uruchamiam w PM2”. Panel nie uruchamia automatycznie niezaakceptowanych serwerów.
-- Domyślnie port 25566, aby nowa instancja nie kolidowała z dotychczasowym Paper na 25565.
-- WWW pozostaje na pulpicie także po przełączeniu instancji Minecraft.
-- Nie usuwamy starego Paper, świata ani bazy MySQL; przełączenie i usuwanie starego serwera dopiero po weryfikacji nowego.
+- Naprawiono kreator: PaperMC Fill v3 zwraca URL pliku JAR w domenie `fill-data.papermc.io`, której instalator 1.5.4 nie dopuszczał.
+- Dopuszczamy ten dokładny host przez HTTPS zarówno dla adresu pliku, jak i przekierowań. Pozostałe nieznane hosty i niebezpieczne URL nadal są blokowane.
+- Komunikat błędu pobierania pokazuje teraz odrzucony host, aby ułatwić diagnozę.
+- Zachowano weryfikację SHA-256/SHA-512, limit wielkości JAR, atomowe przygotowanie nowego katalogu, sprawdzanie portów i osobną akceptację EULA.
+- Zmiana dotyczy tylko pobierania nowych instalacji. Nie modyfikuje działającego serwera ani strony WWW.

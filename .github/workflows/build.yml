@@ -57,6 +57,7 @@ jobs:
       - run: node tests/ui.cjs
       - run: node tests/instances.cjs
       - run: python3 tests/test_instance_prepare.py
+      - run: python3 tests/test_catalog_download_hosts.py
       - run: node tests/update-window.cjs
       - run: python3 tests/test_remote_editor.py
       - run: python3 tests/test_security.py

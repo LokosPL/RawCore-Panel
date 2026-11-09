@@ -78,10 +78,18 @@ try:
    os.makedirs(parent,mode=0o700,exist_ok=True)
   if os.path.realpath(parent)!=parent:raise SystemExit('Katalog nadrzędny przechodzi przez symlink')
   stage=tempfile.mkdtemp(prefix='.rawcraft-stage-',dir=parent)
-  agent='RAWCRAFT-Control/1.5.4 (https://github.com/LokosPL/RawCore-Panel)'
+  agent='RAWCRAFT-Control/1.5.5 (https://github.com/LokosPL/RawCore-Panel)'
+  # Paper Fill API returns JAR objects at fill-data.papermc.io (not fill.papermc.io).
+  # Keep an exact hostname allowlist: never follow arbitrary API-controlled redirects.
+  allowed_hosts=frozenset(('fill.papermc.io','fill-data.papermc.io','cdn.papermc.io','cdn.modrinth.com'))
+  def validate_download_url(url):
+   parts=urllib.parse.urlsplit(url)
+   if parts.scheme!='https' or parts.hostname not in allowed_hosts or parts.username or parts.password or parts.port not in (None,443):
+    raise RuntimeError('Nieobsługiwany serwer pobierania: '+str(parts.hostname or '?'))
+   return parts
   class SafeRedirect(urllib.request.HTTPRedirectHandler):
    def redirect_request(self,req,fp,code,msg,headers,newurl):
-    if urllib.parse.urlsplit(newurl).scheme!='https' or urllib.parse.urlsplit(newurl).hostname not in ('fill.papermc.io','cdn.papermc.io','cdn.modrinth.com'):raise RuntimeError('Nieobsługiwane przekierowanie pobierania')
+    validate_download_url(newurl)
     return super().redirect_request(req,fp,code,msg,headers,newurl)
   opener=urllib.request.build_opener(SafeRedirect())
   def request(url):
@@ -93,8 +101,7 @@ try:
    if len(data)>8*1024*1024:raise RuntimeError('Za duża odpowiedź API')
    return json.loads(data)
   def download(url,target,checksums):
-   parts=urllib.parse.urlsplit(url)
-   if parts.scheme!='https' or parts.hostname not in ('fill.papermc.io','cdn.papermc.io','cdn.modrinth.com'):raise RuntimeError('Nieobsługiwany serwer pobierania')
+   validate_download_url(url)
    digest=(checksums or {}).get('sha512') or (checksums or {}).get('sha256')
    algorithm='sha512' if (checksums or {}).get('sha512') else 'sha256'
    if not digest or len(digest)!=(128 if algorithm=='sha512' else 64):raise RuntimeError('Brak wiarygodnej sumy kontrolnej '+target.name)
