@@ -259,7 +259,7 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 		_ = json.Unmarshal([]byte(parts[1]), &metrics)
 	}
 	instance,e:=requestInstance(r);if e!=nil{bad(w,e);return}
-    filtered:=make([]Process,0);for _,p:=range processes{if p.Name==instance.MinecraftProcess||p.Name==instance.WWWProcess{filtered=append(filtered,p)}}
+    filtered:=make([]Process,0);settings.RLock();sharedWWW:=settings.Prefs.WWWProcess;settings.RUnlock();for _,p:=range processes{if p.Name==instance.MinecraftProcess||p.Name==instance.WWWProcess||p.Name==sharedWWW{filtered=append(filtered,p)}}
     ok(w, map[string]any{"processes": filtered, "metrics": metrics, "host": c.Host, "user": c.User})
 }
 func pm2prefix() string {
@@ -605,6 +605,8 @@ func main() {
     mux.HandleFunc("/api/rawcore-logs", requireAuth(handleRawcoreLogs))
     mux.HandleFunc("/api/instances/remove", route("POST", handleRemoveInstance))
     mux.HandleFunc("/api/instances/prepare",route("POST",handlePrepareInstance))
+    mux.HandleFunc("/api/instances/catalog",route("POST",handleCatalogPrepare))
+    mux.HandleFunc("/api/instances/catalog-start",route("POST",handleCatalogStart))
     mux.HandleFunc("/api/security", requireAuth(handleSecurity))
 	mux.HandleFunc("/api/password", route("POST", handleChangePassword))
 	mux.HandleFunc("/api/theme", route("POST", handleTheme))
