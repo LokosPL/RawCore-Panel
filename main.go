@@ -422,31 +422,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	ok(w, map[string]string{"message": "Przesłano na VPS: " + p})
 }
-func handleDownload(w http.ResponseWriter, r *http.Request) {
-	c, e := currentPrivilegedCred()
-	if e != nil {
-		bad(w, e)
-		return
-	}
-	p := r.URL.Query().Get("path")
-	if err := checkPath(p); err != nil {
-		bad(w, err)
-		return
-	}
-	name := filepath.Base(p)
-	name = strings.Map(func(r rune) rune {
-		if r == '"' || r == '\r' || r == '\n' || r == '\\' {
-			return '_'
-		}
-		return r
-	}, name)
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", name))
-	w.Header().Set("Cache-Control", "no-store")
-	ctx, cancel := context.WithTimeout(r.Context(), 45*time.Minute)
-	defer cancel()
-	_ = streamRemote(ctx, c, "cat -- "+quote(p), nil, w)
-}
+func handleDownload(w http.ResponseWriter, r *http.Request) { handleDownloadV2(w,r) }
 func handleMkdir(w http.ResponseWriter, r *http.Request) {
 	c, e := currentPrivilegedCred()
 	if e != nil {

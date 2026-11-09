@@ -1,6 +1,7 @@
-# RAWCRAFT Control 1.5.6 — poprawka fałszywych alarmów Minecraft
+# RAWCRAFT Control 1.5.7 — menedżer plików
 
-- Naprawiono monitor logów PM2: starym wpisom bez daty nie jest przypisywana data późniejszego dopisania do całego pliku.
-- Gdy log zawiera datowane komunikaty, niedatowane kontynuacje otrzymują czas poprzedniego wpisu, a wpisy sprzed pierwszej daty nie wywołują alarmu.
-- Logi zachowują pełną historię, niczego nie czyścimy i nie restartujemy Minecrafta ani WWW.
-- Zachowana detekcja aktualnych ERROR/FATAL/Exception, dodane testy regresji dla starego błędu read-only z nowymi ostrzeżeniami Java.
+- Foldery można pobierać jako ZIP, a pliki binarne i JAR do komputera bez opuszczania panelu.
+- Nowy mechanizm pobierania obsługuje strumień i okno zapisu (gdy system je udostępnia), z awaryjną obsługą małych plików.
+- Błędy pobierania (brak pliku, uprawnień lub problem z SSH) zgłaszane są zamiast pustego pobranego pliku.
+- Foldery wraz z zawartością można usuwać po wyraźnym potwierdzeniu. Zabezpieczono katalog główny instancji oraz symlinki.
+- Pobieranie i usuwanie pozostają ograniczone do wybranej instancji; WWW, PM2 i MySQL nie są modyfikowane.

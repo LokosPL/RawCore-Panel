@@ -62,6 +62,7 @@ jobs:
       - run: python3 tests/test_remote_editor.py
       - run: python3 tests/test_security.py
       - run: python3 tests/test_file_actions.py
+      - run: python3 tests/test_file_download.py
       - run: python3 tests/test_monitor.py
       - run: python3 tests/test_payments.py
       - uses: actions/upload-artifact@v4

@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const appVersion = "1.5.6"
+const appVersion = "1.5.7"
 const updateRepository = "LokosPL/RawCore-Panel"
 const updateAsset = "RAWCRAFT-Control.exe"
 const maxUpdateSize int64 = 256 << 20
