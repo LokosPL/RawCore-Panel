@@ -288,16 +288,83 @@ $('consoleout').addEventListener('scroll',()=>{let el=$('consoleout');followLogs
 async function loadLogs(){syncConsoleControls();if(!connected||logsBusy||logPaused||accountBusy)return;let p=processes.find(p=>String(p.pm_id)===$('logservice').value);if(!p){$('consoleout').textContent='Brak wybranej usługi PM2.';return}logsBusy=true;let generation=session,serial=logsSerial,id=p.pm_id,source=logSource,key=source+':'+id+':'+prefs.serverPath;if(key!==logViewKey){logViewKey=key;followLogs=true;lastLogSnapshot='';pendingLogText=null;$('consoleout').textContent='Ładowanie…';$('logpending').classList.add('hide')}try{let d=await api(source==='latest'?'/api/latest-log?path='+encodeURIComponent(prefs.serverPath):'/api/logs?id='+id);if(generation!==session||serial!==logsSerial||logPaused||String(id)!==$('logservice').value)return;$('logerror').classList.add('hide');renderLogSnapshot(d.logs||'(Brak logów)')}catch(e){if(e?.stale)return;if(generation===session&&serial===logsSerial){$('logerror').textContent='Nie udało się odświeżyć logów: '+e.message;$('logerror').classList.remove('hide')}}finally{logsBusy=false}}
 $('mccommandform').addEventListener('submit',async e=>{e.preventDefault();let command=$('mccommand').value.trim();if(!command)return;$('sendmc').disabled=true;try{let d=await api('/api/minecraft/command',{path:prefs.serverPath,command});renderServerReply($('rconreply'),command,d.output);$('rconreply').classList.remove('hide');$('mccommand').value='';loadLogs()}catch(e){if(e?.stale)return;toast(e.message,true)}finally{$('sendmc').disabled=false}});
 function joinPath(dir,name){return dir.replace(/\/$/,'')+'/'+name}
-async function download(path){let generation=session,query=instanceQuery();try{await renewSession();if(generation!==session)return;window.location.href='/api/download?path='+encodeURIComponent(path)+query}catch(e){if(e?.stale)return;toast(e.message,true)}}
+let downloadBusy=false;
+async function download(path,directory=false){
+ if(downloadBusy){toast('Trwa inne pobieranie.',true);return}
+ const filename=path.split('/').filter(Boolean).pop()+(directory?'.zip':'');
+ const instance=activeInstance,generation=session,query=instanceQuery();
+ let picker=null;
+ // File System Access API streams large exports directly to disk where supported.
+ // The picker must be invoked during the user's click, before asynchronous work.
+ if(typeof window.showSaveFilePicker==='function'){
+  try{picker=await window.showSaveFilePicker({suggestedName:filename})}
+  catch(e){if(e.name==='AbortError')return;picker=null}
+ }
+ downloadBusy=true;transfers++;
+ $('filehint').textContent='Pobieranie '+filename+'…';
+ try{
+  await renewSession();
+  if(generation!==session||instance!==activeInstance)throw Object.assign(Error('Zmieniono instancję.'),{stale:true});
+  let headers={};
+  if(instance){headers['X-RAWCRAFT-Instance']=instance.id;headers['X-RAWCRAFT-Revision']=instance.revision||''}
+  let url='/api/download?path='+encodeURIComponent(path)+query;
+  let response=await fetch(url,{headers,credentials:'same-origin'});
+  if(!response.ok){
+   let result=await response.json().catch(()=>({error:'Błąd HTTP '+response.status}));
+   throw Error(result.error||'Nie udało się pobrać pliku.')
+  }
+  const maxMemory=256*1024*1024;
+  if(picker&&response.body){
+   let writable=await picker.createWritable();
+   try{await response.body.pipeTo(writable)}
+   catch(e){try{await writable.abort()}catch(_){};throw e}
+  }else{
+   let size=Number(response.headers.get('Content-Length')||0);
+   if(size>maxMemory)throw Error('Plik przekracza 256 MB. Włącz obsługę systemowego okna zapisu, aby pobierać duże pliki.');
+   let parts=[],total=0;
+   if(response.body){
+    let reader=response.body.getReader();
+    for(;;){
+     let result=await reader.read();
+     if(result.done)break;
+     total+=result.value.byteLength;
+     if(total>maxMemory){await reader.cancel();throw Error('Pobieranie przekroczyło limit 256 MB w oknie panelu. Użyj systemowego okna zapisu.')}
+     parts.push(result.value);
+    }
+   }else{let blob=await response.blob();total=blob.size;parts=[blob]}
+   if(size&&total!==size)throw Error('Pobieranie przerwane: odebrano niepełny plik.');
+   const objectUrl=URL.createObjectURL(new Blob(parts,{type:directory?'application/zip':'application/octet-stream'}));
+   const anchor=document.createElement('a');anchor.href=objectUrl;anchor.download=filename;anchor.style.display='none';document.body.append(anchor);anchor.click();anchor.remove();
+   setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+  }
+  toast('Pobrano: '+filename)
+ }catch(e){if(!e?.stale)toast('Błąd pobierania: '+(e.name==='AbortError'?'Połączenie przerwane.':e.message),true)}
+ finally{transfers--;downloadBusy=false;$('filehint').textContent=''}
+}
 $('pathform').addEventListener('submit',e=>{e.preventDefault();loadFiles()});
 function parentDir(){let bits=$('path').value.split('/').filter(Boolean);bits.pop();$('path').value='/'+bits.join('/');loadFiles()}
 function isJar(path){return /\.jar$/i.test(path)}
 function closeFileMenu(){$('filemenu').classList.add('hide')}
-function openFileMenu(event,path,file){let menu=$('filemenu');menu.replaceChildren();let title=document.createElement('div');title.className='menufile';title.textContent=file.name;menu.append(title);let actions=file.dir?[['Otwórz',()=>{$('path').value=path;loadFiles()}]]:[['Pobierz',()=>download(path)],...(!isJar(path)?[['Edytuj',()=>openEditor(path)]]:[]),['Usuń',()=>deleteFile(path,file.version)]];for(let [label,fn] of actions){let b=document.createElement('button');b.setAttribute('role','menuitem');b.textContent=label;b.onclick=()=>{closeFileMenu();fn()};menu.append(b)}menu.classList.remove('hide');menu.style.left=Math.max(8,Math.min(event.clientX,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(event.clientY,innerHeight-menu.offsetHeight-8))+'px';menu.querySelector('button')?.focus()}
+function openFileMenu(event,path,file){let menu=$('filemenu');menu.replaceChildren();let title=document.createElement('div');title.className='menufile';title.textContent=file.name;menu.append(title);let actions=file.dir?[['Otwórz',()=>{$('path').value=path;loadFiles()}],['Pobierz ZIP',()=>download(path,true)],['Usuń folder',()=>deleteFile(path,file.version,true)]]:[['Pobierz',()=>download(path)],...(!isJar(path)?[['Edytuj',()=>openEditor(path)]]:[]),['Usuń',()=>deleteFile(path,file.version)]];for(let [label,fn] of actions){let b=document.createElement('button');b.setAttribute('role','menuitem');b.textContent=label;b.onclick=()=>{closeFileMenu();fn()};menu.append(b)}menu.classList.remove('hide');menu.style.left=Math.max(8,Math.min(event.clientX,innerWidth-menu.offsetWidth-8))+'px';menu.style.top=Math.max(8,Math.min(event.clientY,innerHeight-menu.offsetHeight-8))+'px';menu.querySelector('button')?.focus()}
 document.addEventListener('pointerdown',e=>{if(!$('filemenu').contains(e.target))closeFileMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFileMenu()});window.addEventListener('resize',closeFileMenu);document.addEventListener('scroll',closeFileMenu,true);
-async function deleteFile(path,revision){if(editorBusy&&editPath===path){toast('Poczekaj na zakończenie operacji edytora.',true);return}if(!await ask('Usunąć plik z VPS?',path+' — usunięcie jest trwałe.'+(editPath===path?' Otwarty edytor tego pliku zostanie zamknięty.':''),'Usuń plik'))return;try{await api('/api/delete',{path,version:revision});if(editPath===path)closeEditor(true);toast('Usunięto plik.');loadFiles()}catch(e){if(e?.stale)return;toast(e.message,true)}}
+async function deleteFile(path,revision,directory=false){
+ if(editorBusy&&editPath===path){toast('Poczekaj na zakończenie operacji edytora.',true);return}
+ if(!revision){toast('Odśwież katalog i spróbuj ponownie.',true);return}
+ if(directory&&path.replace(/\\/$/,'')===activeInstance?.serverPath?.replace(/\\/$/,'')){toast('Nie można usunąć całego katalogu serwera.',true);return}
+ const title=directory?'Usunąć folder wraz z całą zawartością?':'Usunąć plik z VPS?';
+ const description=directory?path+' — zostaną bezpowrotnie usunięte wszystkie pliki, podfoldery i światy znajdujące się w tym folderze. Zatrzymaj serwer przed usuwaniem aktywnych danych.':path+' — usunięcie jest trwałe.'+(editPath===path?' Otwarty edytor zostanie zamknięty.':'');
+ if(!await ask(title,description,directory?'Usuń folder i zawartość':'Usuń plik'))return;
+ transfers++;
+ try{
+  await api('/api/delete',{path,version:revision},300000);
+  if(editPath===path)closeEditor(true);
+  toast(directory?'Usunięto folder i zawartość.':'Usunięto plik.');
+  loadFiles()
+ }catch(e){if(!e?.stale)toast(e.message,true)}
+ finally{transfers--}
+}
 async function refreshFileList(){if(activeTab!=='files'||editPath||transfers||['INPUT','TEXTAREA'].includes(document.activeElement.tagName)||document.querySelector('dialog[open]'))return;return loadFiles(true)}
-async function loadFiles(quiet=false){if(!connected)return;let serial=++filesSerial,generation=session;if(!quiet)$('filetbody').innerHTML='<tr><td colspan="4" class="empty">Odczytywanie katalogu…</td></tr>';try{let d=await api('/api/files?path='+encodeURIComponent($('path').value));if(serial!==filesSerial||generation!==session)return;let fileKey=JSON.stringify(d);if(quiet&&fileKey===$('filetbody').dataset.snapshot)return;$('filetbody').dataset.snapshot=fileKey;$('path').value=d.path;$('filetbody').replaceChildren();if(!d.items.length)$('filetbody').innerHTML='<tr><td colspan="4" class="empty">Ten katalog jest pusty.</td></tr>';for(let f of d.items){let tr=document.createElement('tr'),name=document.createElement('td'),sz=document.createElement('td'),modified=document.createElement('td'),actions=document.createElement('td'),path=joinPath(d.path,f.name);name.textContent=(f.dir?'▰  ':'▤  ')+f.name;name.tabIndex=0;name.setAttribute('role','button');name.title=f.dir?'Dwuklik otwiera folder':isJar(path)?'Archiwum JAR — pobierz lub usuń':'Dwuklik otwiera edytor';const open=()=>{if(f.dir){$('path').value=path;loadFiles()}else if(isJar(path))toast('Archiwum JAR można pobrać lub zastąpić, ale nie edytować.');else openEditor(path)};tr.oncontextmenu=e=>{e.preventDefault();openFileMenu(e,path,f)};name.ondblclick=open;name.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();open()}};name.style.cursor='pointer';sz.textContent=f.dir?'Folder':bytes(f.size);modified.textContent=date(f.mtime);for(let [label,fn] of f.dir?[['Otwórz',()=>{$('path').value=path;loadFiles()}]]:[['Pobierz',()=>download(path)],...(!isJar(path)?[['Edytuj',()=>openEditor(path)]]:[]),['Usuń',()=>deleteFile(path,f.version)]]){let button=document.createElement('button');button.textContent=label;button.onclick=fn;actions.append(button)}tr.append(name,sz,modified,actions);$('filetbody').append(tr)}$('filehint').textContent=d.items.length+' elementów'}catch(e){if(e?.stale)return;if(serial!==filesSerial||generation!==session)return;$('filetbody').innerHTML='<tr><td colspan="4" class="empty">'+esc(e.message)+'</td></tr>'}}
+async function loadFiles(quiet=false){if(!connected)return;let serial=++filesSerial,generation=session;if(!quiet)$('filetbody').innerHTML='<tr><td colspan="4" class="empty">Odczytywanie katalogu…</td></tr>';try{let d=await api('/api/files?path='+encodeURIComponent($('path').value));if(serial!==filesSerial||generation!==session)return;let fileKey=JSON.stringify(d);if(quiet&&fileKey===$('filetbody').dataset.snapshot)return;$('filetbody').dataset.snapshot=fileKey;$('path').value=d.path;$('filetbody').replaceChildren();if(!d.items.length)$('filetbody').innerHTML='<tr><td colspan="4" class="empty">Ten katalog jest pusty.</td></tr>';for(let f of d.items){let tr=document.createElement('tr'),name=document.createElement('td'),sz=document.createElement('td'),modified=document.createElement('td'),actions=document.createElement('td'),path=joinPath(d.path,f.name);name.textContent=(f.dir?'▰  ':'▤  ')+f.name;name.tabIndex=0;name.setAttribute('role','button');name.title=f.dir?'Dwuklik otwiera folder':isJar(path)?'Archiwum JAR — pobierz lub usuń':'Dwuklik otwiera edytor';const open=()=>{if(f.dir){$('path').value=path;loadFiles()}else if(isJar(path))toast('Archiwum JAR można pobrać lub zastąpić, ale nie edytować.');else openEditor(path)};tr.oncontextmenu=e=>{e.preventDefault();openFileMenu(e,path,f)};name.ondblclick=open;name.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();open()}};name.style.cursor='pointer';sz.textContent=f.dir?'Folder':bytes(f.size);modified.textContent=date(f.mtime);for(let [label,fn] of f.dir?[['Otwórz',()=>{$('path').value=path;loadFiles()}],['Pobierz ZIP',()=>download(path,true)],['Usuń folder',()=>deleteFile(path,f.version,true)]]:[['Pobierz',()=>download(path)],...(!isJar(path)?[['Edytuj',()=>openEditor(path)]]:[]),['Usuń',()=>deleteFile(path,f.version)]]){let button=document.createElement('button');button.textContent=label;button.onclick=fn;actions.append(button)}tr.append(name,sz,modified,actions);$('filetbody').append(tr)}$('filehint').textContent=d.items.length+' elementów'}catch(e){if(e?.stale)return;if(serial!==filesSerial||generation!==session)return;$('filetbody').innerHTML='<tr><td colspan="4" class="empty">'+esc(e.message)+'</td></tr>'}}
 function decodeBytes(data){let raw=atob(data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);return bytes}
 function encodeBytes(data){let raw='';for(let i=0;i<data.length;i+=32768)raw+=String.fromCharCode(...data.subarray(i,i+32768));return btoa(raw)}
 function bytesAsEditor(data,mode){if(mode==='hex'){let rows=[];for(let i=0;i<data.length;i+=16)rows.push(Array.from(data.subarray(i,i+16),b=>b.toString(16).padStart(2,'0')).join(' '));return rows.join('\n')}return new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(data).replace(/\r\n?/g,'\n')}
