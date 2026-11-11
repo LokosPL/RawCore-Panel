@@ -1,8 +1,9 @@
-# RAWCRAFT Control 1.5.9 — naprawa błędu podczas przesyłania folderów
+# RAWCRAFT Control 1.6.0 — odświeżony wygląd panelu
 
-- Każdy plik przesyłany jako część folderu ma weryfikowany i w razie potrzeby odtwarzany katalog nadrzędny tuż przed zapisem na VPS, dzięki czemu wcześniejsze usunięcie pustego folderu nie przerywa transferu FileNotFoundError.
-- Odtwarzanie katalogu działa wyłącznie wewnątrz wybranej instancji, bez podążania za dowiązaniami symbolicznymi i bez rozszerzania uprawnień.
-- Zapobiegamy przypadkowemu zagnieżdżeniu folderu world/world, plugins/plugins itd. przez wskazanie właściwego katalogu nadrzędnego.
-- Wyświetlamy ostrzeżenie o zatrzymaniu Minecrafta przed kopiowaniem aktywnego świata.
-- Testy regresji dla odtworzenia usuniętych folderów, zabezpieczeń ścieżek i symlinków.
-- Nie ingerujemy w istniejący świat, usługę PM2, WWW ani MySQL.
+- Nowy, spokojniejszy wygląd w motywie czarnym i jasnym: spójne zaokrąglenia, cienie, przyciski, pola i paski przewijania.
+- Kompaktowy pasek wyboru instancji oraz karta wybranej instancji w jednym rzędzie.
+- Czytelniejsze kafelki statystyk, karty usług z pigułkowymi statusami i grubszymi paskami zużycia, ikony zielone lub czerwone zależnie od stanu usługi.
+- Karta Parametry VPS wypełnia dostępne miejsce, a tabela plików, alerty, okna dialogowe i powiadomienia mają dopracowany styl.
+- Zmiana dotyczy wyłącznie wyglądu: nie zmieniono logiki, połączeń SSH, plików, usług PM2, WWW ani MySQL.
+
+Poprzednia wersja (1.5.9): naprawa błędu podczas przesyłania folderów — weryfikowany i odtwarzany katalog nadrzędny przed zapisem, ochrona przed zagnieżdżeniem world/world oraz ostrzeżenie o zatrzymaniu Minecrafta przed kopiowaniem aktywnego świata.

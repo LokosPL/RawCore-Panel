@@ -157,6 +157,18 @@ input,textarea,select{border-radius:10px}
 .diskdetail{margin-top:18px}.diskdetail h3{font-weight:650}
 .diskrow{border-radius:12px;background:var(--rc-raised);border-color:var(--rc-line)}
 .footer{opacity:.75}
+/* polish pass */
+.service,.stat{transition:border-color .18s,transform .18s,box-shadow .18s}
+.service:hover{transform:translateY(-1px)}
+:root[data-theme=dark] .service:hover,:root[data-theme=dark] .stat:hover{border-color:#2b3644}
+.alert,.notice{border-radius:12px}
+.filelist th{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding-top:13px;padding-bottom:13px}
+.filelist td{padding-top:12px;padding-bottom:12px}
+.filelist button{border-radius:8px}
+dialog{border-radius:16px;box-shadow:0 30px 80px -20px #000a}dialog::backdrop{background:#03050888;backdrop-filter:blur(3px)}
+.loginbox .primary{box-shadow:0 10px 26px -10px #e9ad35aa;border-radius:12px}
+.consoleTabs button{border-radius:99px}
+.notificationpanel{border-radius:14px;box-shadow:0 24px 60px -18px #000b}
 </style>
 <link rel="stylesheet" href="/assets/vendor/xterm.css"><script src="/assets/vendor/xterm.js"></script><script src="/assets/vendor/addon-fit.js"></script><script src="/assets/vendor/terminal-client.js"></script></head>
 <body>
