@@ -57,6 +57,8 @@ Filename: "{app}\RAWCRAFT-Control.exe"; Description: "Uruchom RAWCRAFT Control";
 [UninstallDelete]
 Type: files; Name: "{app}\RAWCRAFT-Control.exe.old"
 Type: files; Name: "{app}\RAWCRAFT-Control.exe.new"
+Type: files; Name: "{app}\RAWCRAFT-Control.exe.*"
+Type: files; Name: "{app}\.rawcraft-update-write-*"
 Type: files; Name: "{app}\*.rawcraft-tmp"
 Type: files; Name: "{app}\.rawcraft-write-check-*.tmp"
 Type: dirifempty; Name: "{app}"
