@@ -30,5 +30,22 @@ Run-Setup (Join-Path $installDir 'unins000.exe') '/VERYSILENT /SUPPRESSMSGBOXES 
 if (Test-Path $exe) { throw 'Uninstall left application binary' }
 if (-not (Test-Path $sentinel)) { throw 'Uninstall removed user settings' }
 Remove-Item $sentinel
-
-
+# Full removal on request: /PURGE deletes settings, saved secrets, cache, WebView data and shortcuts.
+Run-Setup (Join-Path $PWD 'dist/RAWCRAFT-Control-Setup.exe') "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR=`"$installDir`""
+if (-not (Test-Path $exe)) { throw 'Reinstall before purge failed' }
+$desktopLink = Join-Path ([Environment]::GetFolderPath('Desktop')) 'RAWCRAFT Control.lnk'
+if (-not (Test-Path $desktopLink)) { throw 'Desktop shortcut was not created by default' }
+$cacheDir = Join-Path $env:LOCALAPPDATA 'RawcraftControl'
+New-Item -ItemType Directory -Force $settingsDir, (Join-Path $cacheDir 'updates') | Out-Null
+Set-Content (Join-Path $settingsDir 'purge-sentinel.txt') 'remove me'
+Set-Content (Join-Path $cacheDir 'updates\purge-sentinel.txt') 'remove me'
+Set-Content (Join-Path $installDir 'RAWCRAFT-Control.exe.old') 'stale update leftover'
+Run-Setup (Join-Path $installDir 'unins000.exe') '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /PURGE'
+if (Test-Path $exe) { throw 'Purge uninstall left application binary' }
+for ($i = 0; ($i -lt 20) -and (Test-Path $installDir); $i++) { Start-Sleep -Milliseconds 500 }
+if (Test-Path $installDir) { Get-ChildItem -Force $installDir | Format-Table -AutoSize | Out-String | Write-Host; throw 'Purge uninstall left the installation folder' }
+if (Test-Path $settingsDir) { throw 'Purge uninstall kept user settings' }
+if (Test-Path $cacheDir) { throw 'Purge uninstall kept cache and WebView data' }
+if (Test-Path $desktopLink) { throw 'Uninstall left the desktop shortcut' }
+if (Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\RAWCRAFT-Control_is1') { throw 'Uninstall left the registry entry' }
+Write-Host 'PASS: install, update, reinstall, keep-settings uninstall and full /PURGE uninstall'

@@ -54,6 +54,12 @@ PANEL
   Hasło nie wraca do interfejsu i nie jest wpisywane do pola przez przeglądarkę.
   Ustawienia są w katalogu konfiguracji konta, niezależnie od położenia EXE.
 
+ODINSTALOWANIE
+Ustawienia Windows → Aplikacje → RAWCRAFT Control → Odinstaluj. Panel zostanie
+zamknięty, a instalator zapyta, czy usunąć też ustawienia, zapisane hasło SSH,
+token GitHub, pamięć podręczną i pobrane aktualizacje (Tak = usuń wszystko).
+Skrypt: unins000.exe /VERYSILENT /PURGE. Pliki na VPS nie są zmieniane.
+
 AKTUALIZACJE GITHUB
 Aplikacja sprawdza stabilne GitHub Releases przy starcie i co 5 minut.
 Nowa wersja pobiera się automatycznie w tle; suma SHA-256 jest sprawdzana.

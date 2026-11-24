@@ -9,6 +9,12 @@
 - Serwer na systemd (rawcore-survival.service) jest widoczny po kliknięciu „Serwer Minecraft”.
 - Pulpit nie pisze już „Wszystko działa”, gdy serwera Minecraft nie widać.
 
+**Instalator i odinstalowanie**
+- Odinstalowanie najpierw zamyka działający panel, a potem pyta, czy usunąć wszystko: ustawienia, profile VPS, zapamiętane hasło SSH, token, historię powiadomień, dane okna i pobrane aktualizacje. „Tak” czyści komputer do zera; „Nie” zachowuje ustawienia na wypadek ponownej instalacji. Pliki na VPS nie są ruszane.
+- Usuwane są też resztki po aktualizacjach (.old/.new), skrót na pulpicie, wpis w „Aplikacjach” i pusty folder programu.
+- Skrót na pulpicie jest tworzony domyślnie; instalator i wpis w Windows mają pełną nazwę, wersję i link do projektu.
+- Tryb skryptowy: `unins000.exe /VERYSILENT /PURGE` usuwa wszystko bez pytań.
+
 **Wygląd i wygoda**
 - Pulpit pokazuje stan na żywo: „Wszystko działa” / „N usług wymaga uwagi”, pierścień usług online i pigułki CPU / RAM / dysk (żółte od 75%, czerwone od 90%).
 - Szybkie akcje Ctrl+K (albo „Szukaj…”): sekcje, usługi, instancje, nowa instancja, aktualizacje, motyw. W terminalu SSH Ctrl+K zostaje dla powłoki.
