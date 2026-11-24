@@ -2,6 +2,7 @@
 
 - **Żywy stan serwera na starcie**: zamiast statycznego banera panel od razu mówi, czy „Wszystko działa”, czy któraś usługa wymaga uwagi — z listą zatrzymanych usług, pierścieniem „online 2/2” oraz pigułkami CPU / RAM / dysk (zielone, żółte od 75%, czerwone od 90%).
 - **Szybkie akcje Ctrl+K**: przycisk „Szukaj…” w górnym pasku i skrót Ctrl+K otwierają wyszukiwarkę sekcji, usług, instancji i akcji (nowa instancja, sprawdzenie aktualizacji, powiadomienia, zmiana motywu). Działa strzałkami i Enterem, ignoruje polskie znaki. W terminalu SSH Ctrl+K nadal trafia do powłoki.
+- **Serwer Minecraft na systemd jest widoczny w „Zarządzaniu usługą”**: gdy nie ma procesu PM2 o nazwie z ustawień, ale działa RawCore Survival (rawcore-survival.service), kliknięcie „Serwer Minecraft” pokazuje jego kartę ze startem, restartem, zatrzymaniem i logami zamiast komunikatu „Nie znaleziono”. Gdy nie ma żadnego z nich, panel wypisuje procesy PM2 znalezione na VPS i prowadzi do ustawień.
 - **Kropki stanu w menu**: przy „Serwer Minecraft” i „Strona WWW” widać zieloną lub czerwoną kropkę bez wchodzenia na pulpit.
 - **Spójne ikony**: wszystkie pozycje menu, kafelki statystyk, skróty i przyciski mają jeden zestaw liniowych ikon zamiast znaków tekstowych, które w części czcionek Windows wyświetlały się jako „‹”.
 - **Czytelniejsza instancja**: aktywna instancja ma złoty akcent i etykietę „Aktywna”, a przycisk „Wybierz” nie dubluje już wybranej.
