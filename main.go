@@ -260,7 +260,54 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	instance,e:=requestInstance(r);if e!=nil{bad(w,e);return}
     filtered:=make([]Process,0);settings.RLock();sharedWWW:=settings.Prefs.WWWProcess;settings.RUnlock();for _,p:=range processes{if p.Name==instance.MinecraftProcess||p.Name==instance.WWWProcess||p.Name==sharedWWW{filtered=append(filtered,p)}}
-    ok(w, map[string]any{"processes": filtered, "metrics": metrics, "host": c.Host, "user": c.User})
+    ok(w, map[string]any{"processes": filtered, "metrics": metrics, "host": c.Host, "user": c.User, "candidates": minecraftCandidates(parts[0][start:end+1], instance, sharedWWW, filtered)})
+}
+
+// minecraftCandidate is a PM2 process that looks like a Minecraft server while the
+// instance's configured process name is missing. Only the name and working directory
+// are exposed so the user can pick it in settings.
+type minecraftCandidate struct {
+	Name string `json:"name"`
+	Cwd  string `json:"cwd"`
+}
+
+var minecraftNamePattern = regexp.MustCompile(`(?i)minecraft|paper|spigot|purpur|survival|rawcore|fabric|forge|velocity|bungee|(^|[-_])mc([-_]|$)`)
+
+func minecraftCandidates(raw string, instance ServerInstance, sharedWWW string, filtered []Process) []minecraftCandidate {
+	out := make([]minecraftCandidate, 0)
+	for _, p := range filtered {
+		if p.Name == instance.MinecraftProcess {
+			return out
+		}
+	}
+	var list []struct {
+		Name string `json:"name"`
+		Env  struct {
+			Cwd         string `json:"pm_cwd"`
+			ExecPath    string `json:"pm_exec_path"`
+			Interpreter string `json:"exec_interpreter"`
+		} `json:"pm2_env"`
+	}
+	if json.Unmarshal([]byte(raw), &list) != nil {
+		return out
+	}
+	settings.RLock()
+	taken := map[string]bool{instance.WWWProcess: true, sharedWWW: true}
+	for _, other := range settings.Prefs.Instances {
+		taken[other.MinecraftProcess] = true
+		taken[other.WWWProcess] = true
+	}
+	settings.RUnlock()
+	for _, p := range list {
+		if p.Name == "" || taken[p.Name] || len(out) >= 5 {
+			continue
+		}
+		hint := strings.ToLower(p.Env.ExecPath + " " + p.Env.Interpreter)
+		if minecraftNamePattern.MatchString(p.Name) || strings.Contains(hint, "java") || strings.HasSuffix(hint, ".jar") {
+			out = append(out, minecraftCandidate{Name: p.Name, Cwd: p.Env.Cwd})
+		}
+	}
+	return out
 }
 func pm2prefix() string {
 	return "command -v pm2 >/dev/null 2>&1 || { test -s \"$HOME/.nvm/nvm.sh\" && source \"$HOME/.nvm/nvm.sh\"; }; "

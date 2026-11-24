@@ -84,3 +84,15 @@ func TestCredentialsAndPaths(t *testing.T) {
 		t.Fatalf("bad shell quoting: %s", got)
 	}
 }
+
+func TestMinecraftCandidatesSuggestRenamedServer(t *testing.T) {
+	raw := `[{"name":"www","pm2_env":{"pm_cwd":"/var/www"}},{"name":"minecraft-survival","pm2_env":{"pm_cwd":"/home/rawcraft/survival","pm_exec_path":"/opt/rawcore-java25/bin/java"}},{"name":"lobby","pm2_env":{"pm_cwd":"/srv/lobby","exec_interpreter":"none","pm_exec_path":"/usr/bin/java"}},{"name":"bot","pm2_env":{"pm_cwd":"/srv/bot","pm_exec_path":"/srv/bot/index.js","exec_interpreter":"node"}}]`
+	inst := ServerInstance{ID: "normalny", MinecraftProcess: "minecraft", WWWProcess: "www"}
+	got := minecraftCandidates(raw, inst, "www", []Process{{Name: "www"}})
+	if len(got) != 2 || got[0].Name != "minecraft-survival" || got[0].Cwd != "/home/rawcraft/survival" || got[1].Name != "lobby" {
+		t.Fatalf("unexpected candidates: %+v", got)
+	}
+	if found := minecraftCandidates(raw, inst, "www", []Process{{Name: "minecraft"}}); len(found) != 0 {
+		t.Fatalf("configured process present, expected no suggestions: %+v", found)
+	}
+}
