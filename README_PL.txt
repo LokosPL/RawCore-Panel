@@ -1,4 +1,4 @@
-RAWCRAFT Control 1.7.0 — Windows 10/11 x64
+RAWCRAFT Control 1.7.1 — Windows 10/11 x64
 
 URUCHOMIENIE
 1. Pobierz RAWCRAFT-Control.exe z GitHub Releases lub artefaktów GitHub Actions.
@@ -63,7 +63,10 @@ Poprzedni EXE pozostaje pod nazwą .old. Błąd podmiany przywraca poprzedni pli
 Komunikaty błędów instalacji: katalog cache konta / RawcraftControl / updates.
 
 Repozytorium aktualizacji: LokosPL/RawCore-Panel (publiczne):
-- W Ustawieniach wklej fine-grained token GitHub ograniczony do tego repozytorium
+- Od wersji 1.7.1 token nie jest potrzebny: aplikacja sprawdza publiczne wydania
+  anonimowo (limit GitHub 60 zapytań/h wystarcza na sprawdzanie co 5 minut).
+- Token jest potrzebny tylko, jeśli repozytorium znów będzie prywatne.
+  Wtedy w Ustawieniach wklej fine-grained token GitHub ograniczony do tego repozytorium
   z uprawnieniem Contents: Read-only. Token tworzysz na swoim koncie GitHub.
 - Windows DPAPI szyfruje zapisany token dla bieżącego użytkownika Windows.
   Aplikacja nigdy nie odsyła zapisanego tokenu do interfejsu.

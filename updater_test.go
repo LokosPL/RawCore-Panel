@@ -176,13 +176,16 @@ func TestGitHubAccessFailuresAreActionable(t *testing.T){
  if e==nil{t.Fatal("accepted denied access")};updateFailure(e);status:=updateSnapshot();if status.State!="access_denied"||!strings.Contains(status.Message,"Contents: Read-only"){t.Fatalf("unhelpful access failure: %+v",status)}
  }
 }
-func TestMissingTokenDoesNotPretendToBeCurrent(t *testing.T){
+func TestMissingTokenUsesPublicReleasesAnonymously(t *testing.T){
  if runtime.GOOS!="windows"{t.Skip("Windows updater")}
  settings.Lock();oldToken,oldAuto:=settings.Token,settings.Prefs.AutoUpdate;settings.Token="";settings.Prefs.AutoUpdate=true;settings.Unlock()
  defer func(){settings.Lock();settings.Token=oldToken;settings.Prefs.AutoUpdate=oldAuto;settings.Unlock()}()
  updates.Lock();updates.Status=UpdateStatus{State:"idle",Current:appVersion};updates.Busy=false;updates.Unlock()
- old:=githubClient;defer func(){githubClient=old}();githubClient=&http.Client{Transport:mockTransport(func(r *http.Request)(*http.Response,error){t.Fatal("request without private repository credential");return nil,nil})}
- checkForUpdate(false);if updateSnapshot().State!="needs_token"{t.Fatalf("missing token hidden: %+v",updateSnapshot())}
+ calls:=0
+ old:=githubClient;defer func(){githubClient=old}();githubClient=&http.Client{Transport:mockTransport(func(r *http.Request)(*http.Response,error){calls++;if r.Header.Get("Authorization")!=""{t.Error("anonymous check sent a credential")};return &http.Response{StatusCode:404,Header:http.Header{},Body:io.NopCloser(strings.NewReader(`{"message":"Not Found"}`)),Request:r},nil})}
+ checkForUpdate(false)
+ if calls!=1{t.Fatalf("public release check not attempted: %d calls",calls)}
+ if updateSnapshot().State!="needs_token"{t.Fatalf("private repository not reported: %+v",updateSnapshot())}
 }
 
 

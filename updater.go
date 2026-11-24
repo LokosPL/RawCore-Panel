@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const appVersion = "1.7.0"
+const appVersion = "1.7.1"
 const updateRepository = "LokosPL/RawCore-Panel"
 const updateAsset = "RAWCRAFT-Control.exe"
 const maxUpdateSize int64 = 256 << 20
@@ -266,10 +266,10 @@ func checkForUpdate(manual bool) {
 		setUpdate("unsupported", "Automatyczne aktualizacje są dostępne dla Windows x64")
 		return
 	}
-	if strings.TrimSpace(token) == "" {
-		setUpdate("needs_token", "Wymagana jednorazowa autoryzacja prywatnych aktualizacji GitHub.")
-		return
-	}
+	// The release repository is public: without a token the updater uses anonymous
+	// GitHub API access (60 requests/hour, enough for a check every 5 minutes).
+	// A token is only needed when the repository becomes private again.
+	anonymous := strings.TrimSpace(token) == ""
 	setUpdate("checking", "Sprawdzanie aktualizacji…")
 	updates.Lock()
 	updates.Status.Downloaded = 0
@@ -282,6 +282,11 @@ func checkForUpdate(manual bool) {
 	resp, e := githubRequest(metadataCtx, "https://api.github.com/repos/"+updateRepository+"/releases/latest", token, "application/vnd.github+json")
 	if e != nil {
 		metadataCancel()
+		var access *updateAccessError
+		if anonymous && errors.As(e, &access) {
+			setUpdate("needs_token", "Repozytorium aktualizacji nie jest publiczne. Wymagana jednorazowa autoryzacja GitHub.")
+			return
+		}
 		updateFailure(e)
 		return
 	}
