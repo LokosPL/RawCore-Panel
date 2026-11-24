@@ -1,4 +1,4 @@
-RAWCRAFT Control 1.4.4 — Windows 10/11 x64
+RAWCRAFT Control 1.7.0 — Windows 10/11 x64
 
 URUCHOMIENIE
 1. Pobierz RAWCRAFT-Control.exe z GitHub Releases lub artefaktów GitHub Actions.
@@ -17,6 +17,10 @@ Przy odświeżaniu danych procesy SSH i ASKPASS nie otwierają okien CMD.
 EXE jest kompilowany jako aplikacja GUI z ikoną RAWCRAFT.
 
 PANEL
+- Pulpit od razu pokazuje stan: „Wszystko działa” albo listę usług wymagających uwagi,
+  pierścień usług online oraz CPU / RAM / dysk VPS.
+- Ctrl+K (albo „Szukaj…” w górnym pasku): szybkie przejście do sekcji, usługi,
+  instancji lub akcji. W terminalu SSH skrót Ctrl+K pozostaje dla powłoki.
 - Karty usług PM2: status, CPU/RAM, start, stop, restart.
 - Zasoby VPS: CPU, RAM, dysk /, czas pracy, nazwa hosta.
 - Wskaźnik CPU usługi jest odnoszony do liczby rdzeni VPS; liczba pokazuje

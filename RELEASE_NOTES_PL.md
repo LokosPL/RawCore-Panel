@@ -1,9 +1,13 @@
-# RAWCRAFT Control 1.6.0 — odświeżony wygląd panelu
+# RAWCRAFT Control 1.7.0 — przejrzysty panel i szybkie akcje
 
-- Nowy, spokojniejszy wygląd w motywie czarnym i jasnym: spójne zaokrąglenia, cienie, przyciski, pola i paski przewijania.
-- Kompaktowy pasek wyboru instancji oraz karta wybranej instancji w jednym rzędzie.
-- Czytelniejsze kafelki statystyk, karty usług z pigułkowymi statusami i grubszymi paskami zużycia, ikony zielone lub czerwone zależnie od stanu usługi.
-- Karta Parametry VPS wypełnia dostępne miejsce, a tabela plików, alerty, okna dialogowe i powiadomienia mają dopracowany styl.
-- Zmiana dotyczy wyłącznie wyglądu: nie zmieniono logiki, połączeń SSH, plików, usług PM2, WWW ani MySQL.
+- **Żywy stan serwera na starcie**: zamiast statycznego banera panel od razu mówi, czy „Wszystko działa”, czy któraś usługa wymaga uwagi — z listą zatrzymanych usług, pierścieniem „online 2/2” oraz pigułkami CPU / RAM / dysk (zielone, żółte od 75%, czerwone od 90%).
+- **Szybkie akcje Ctrl+K**: przycisk „Szukaj…” w górnym pasku i skrót Ctrl+K otwierają wyszukiwarkę sekcji, usług, instancji i akcji (nowa instancja, sprawdzenie aktualizacji, powiadomienia, zmiana motywu). Działa strzałkami i Enterem, ignoruje polskie znaki. W terminalu SSH Ctrl+K nadal trafia do powłoki.
+- **Kropki stanu w menu**: przy „Serwer Minecraft” i „Strona WWW” widać zieloną lub czerwoną kropkę bez wchodzenia na pulpit.
+- **Spójne ikony**: wszystkie pozycje menu, kafelki statystyk, skróty i przyciski mają jeden zestaw liniowych ikon zamiast znaków tekstowych, które w części czcionek Windows wyświetlały się jako „‹”.
+- **Czytelniejsza instancja**: aktywna instancja ma złoty akcent i etykietę „Aktywna”, a przycisk „Wybierz” nie dubluje już wybranej.
+- **Telefon / wąskie okno**: pasek instancji nie wychodzi poza ekran, karta instancji układa się pionowo, pierścień stanu zostaje widoczny.
+- Krótsze nazwy motywów (Motyw systemowy / Ciemny / Jasny), równe rozmieszczenie wskaźników w karcie Parametry VPS.
+- Archiwum źródeł w wydaniu ma teraz numer bieżącej wersji (wcześniej zawsze „1.5.0”).
+- Bez zmian w logice SSH, PM2, plikach, kopiach, płatnościach i aktualizatorze.
 
-Poprzednia wersja (1.5.9): naprawa błędu podczas przesyłania folderów — weryfikowany i odtwarzany katalog nadrzędny przed zapisem, ochrona przed zagnieżdżeniem world/world oraz ostrzeżenie o zatrzymaniu Minecrafta przed kopiowaniem aktywnego świata.
+Poprzednia wersja (1.6.0): odświeżony wygląd panelu — spokojniejsze powierzchnie, czytelniejsze kafelki i karty usług.

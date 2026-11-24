@@ -95,7 +95,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-Lucide icons (globe, box, bell), https://github.com/lucide-icons/lucide
+Lucide icons (globe, box, bell, layout-dashboard, wallet, settings-2, terminal, folder,
+archive, square-terminal, key-round, settings, layers, circle-check, gauge, clock, search,
+log-out, power, server, plus, refresh-cw, moon, menu), https://github.com/lucide-icons/lucide
 ISC License
 
 Copyright (c) 2026 Lucide Icons and Contributors

@@ -129,7 +129,9 @@ jobs:
       - name: Package complete sources and provenance
         shell: pwsh
         run: |
-          git -c core.autocrlf=false archive --format=zip --output=dist/RAWCRAFT-Control-1.5.0-src.zip HEAD
+          $version = [regex]::Match((Get-Content updater.go -Raw), 'const appVersion = "([^"]+)"').Groups[1].Value
+          if (-not $version) { throw 'Missing application version' }
+          git -c core.autocrlf=false archive --format=zip --output="dist/RAWCRAFT-Control-$version-src.zip" HEAD
           if ($LASTEXITCODE -ne 0) { throw 'Source archive failed' }
           git rev-parse HEAD | Set-Content -Encoding ascii dist/COMMIT.txt
           Copy-Item INTEGRATION_PL.md,RELEASE_NOTES_PL.md dist/
@@ -142,6 +144,29 @@ jobs:
           name: RAWCRAFT-Control-Windows-x64
           path: dist/*
           retention-days: 30
+  preview:
+    # Branches named preview/* publish a private DRAFT pre-release with the tested EXE and installer.
+    # Drafts are visible only to repository collaborators and are never offered by the in-app updater
+    # (it reads /releases/latest, which skips drafts and pre-releases).
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/preview/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: RAWCRAFT-Control-Windows-x64
+          path: dist
+      - name: Publish draft preview build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(tr -d '\r\n' < dist/COMMIT.txt)" = "$GITHUB_SHA"
+          version=$(sed -n 's/^const appVersion = "\([^"]*\)"/\1/p' updater.go)
+          tag="v$version-preview.$GITHUB_RUN_NUMBER"
+          gh release create "$tag" dist/* --draft --prerelease --target "$GITHUB_SHA" --title "RAWCRAFT Control $version — podgląd ($GITHUB_REF_NAME)" --notes-file RELEASE_NOTES_PL.md
   release:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/release/multi-instance-1.4.9-20261105') || startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
     needs: build
