@@ -7,6 +7,7 @@ import (
     "encoding/hex"
     "encoding/json"
     "errors"
+    "fmt"
     "io"
     "net/http"
     "path"
@@ -45,14 +46,23 @@ func normalizedInstances(p Preferences) []ServerInstance {
     for i:=range items{items[i].Revision=instanceRevision(p,items[i])};return items
 }
 func validateInstances(items []ServerInstance) error {
-    ids,processes,ports:=map[string]bool{},map[string]bool{},map[int]bool{}
+    ids,processes:=map[string]bool{},map[string]bool{}
+    ports:=map[int]string{}
     for i,s:=range items {
         if !regexp.MustCompile(`^[a-z0-9][a-z0-9_-]{0,31}$`).MatchString(s.ID)||ids[s.ID]||strings.TrimSpace(s.Name)==""||len(s.Name)>80{return errors.New("Niepoprawna lub powtórzona nazwa instancji")};ids[s.ID]=true
         if checkPath(s.ServerPath)!=nil||path.Clean(s.ServerPath)!=s.ServerPath||s.ServerPath=="/"{return errors.New("Podaj osobny pełny katalog instancji")}
         for _,other:=range items[:i]{if withinPath(s.ServerPath,other.ServerPath)||withinPath(other.ServerPath,s.ServerPath){return errors.New("Katalogi instancji nie mogą na siebie nachodzić")}}
         for _,name:=range []string{s.MinecraftProcess,s.WWWProcess}{if name==""{continue};if !regexp.MustCompile(`^[A-Za-z0-9_-]{1,100}$`).MatchString(name)||processes[name]{return errors.New("Konflikt nazw procesów PM2")};processes[name]=true}
         if s.MinecraftProcess==""{return errors.New("Podaj nazwę procesu Minecraft")}
-        for _,port:=range []int{s.Port,s.RCONPort,s.CorePort}{if port==0{continue};if port<1||port>65535||ports[port]{return errors.New("Konflikt portów instancji")};ports[port]=true}
+        for _, binding := range []struct{ port int; role string }{{s.Port, "gra"}, {s.RCONPort, "RCON"}, {s.CorePort, "Core API"}} {
+            if binding.port == 0 { continue }
+            owner := s.Name + " (" + binding.role + ")"
+            if previous, used := ports[binding.port]; used {
+                return fmt.Errorf("Port %d jest przypisany do %s i %s", binding.port, previous, owner)
+            }
+            if binding.port < 1 || binding.port > 65535 { return fmt.Errorf("Niepoprawny port %d dla %s", binding.port, owner) }
+            ports[binding.port] = owner
+        }
     }
     if len(items)>32{return errors.New("Maksymalnie 32 instancje")};return nil
 }

@@ -238,7 +238,7 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 35*time.Second)
 	defer cancel()
-	remote := pm2prefix() + "if command -v pm2 >/dev/null 2>&1; then pm2 jlist 2>/dev/null || printf '[]'; else printf '[]'; fi; printf '\\n__RAWCRAFT_METRICS__\\n'; " + remPython(metricsPython)
+	remote := pm2prefix() + "if command -v pm2 >/dev/null 2>&1; then pm2 jlist; else printf '[]'; fi && { printf '\\n__RAWCRAFT_METRICS__\\n'; " + remPython(metricsPython) + "; }"
 	raw, err := runRemote(ctx, c, remote)
 	if err != nil {
 		bad(w, err)
@@ -258,9 +258,42 @@ func handleStatus(w http.ResponseWriter, r *http.Request) {
 	if len(parts) == 2 {
 		_ = json.Unmarshal([]byte(parts[1]), &metrics)
 	}
-	instance,e:=requestInstance(r);if e!=nil{bad(w,e);return}
-    filtered:=make([]Process,0);settings.RLock();sharedWWW:=settings.Prefs.WWWProcess;settings.RUnlock();for _,p:=range processes{if p.Name==instance.MinecraftProcess||p.Name==instance.WWWProcess||p.Name==sharedWWW{filtered=append(filtered,p)}}
-    ok(w, map[string]any{"processes": filtered, "metrics": metrics, "host": c.Host, "user": c.User, "candidates": minecraftCandidates(parts[0][start:end+1], instance, sharedWWW, filtered)})
+	instance, err := requestInstance(r)
+	if err != nil {
+		bad(w, err)
+		return
+	}
+	settings.RLock()
+	sharedWWW := settings.Prefs.WWWProcess
+	instances := normalizedInstances(settings.Prefs)
+	settings.RUnlock()
+	filtered := make([]Process, 0)
+	for _, p := range processes {
+		if p.Name == instance.MinecraftProcess || p.Name == instance.WWWProcess || p.Name == sharedWWW {
+			filtered = append(filtered, p)
+		}
+	}
+	ok(w, map[string]any{
+		"processes": filtered, "metrics": metrics, "host": c.Host, "user": c.User,
+		"candidates": minecraftCandidates(parts[0][start:end+1], instance, sharedWWW, filtered),
+		"networkProcesses": networkProcessStates(instances, processes),
+	})
+}
+
+// Report only status for the overview. Actions and logs stay scoped to the selected instance.
+func networkProcessStates(instances []ServerInstance, processes []Process) map[string]string {
+	tracked := map[string]string{"rawcraft-velocity": "missing", "velocity": "missing"}
+	for _, instance := range instances {
+		if instance.ID != "vps" && instance.MinecraftProcess != "" {
+			tracked[instance.MinecraftProcess] = "missing"
+		}
+	}
+	for _, process := range processes {
+		if _, ok := tracked[process.Name]; ok {
+			tracked[process.Name] = process.Env.Status
+		}
+	}
+	return tracked
 }
 
 // minecraftCandidate is a PM2 process that looks like a Minecraft server while the

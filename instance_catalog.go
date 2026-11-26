@@ -55,10 +55,14 @@ for item in items:
   if os.path.getsize(props)>65536: raise SystemExit('Zbyt duża konfiguracja istniejącej instancji')
   lines=[line.strip().split('=',1) for line in open(props,encoding='utf-8') if '=' in line and not line.lstrip().startswith(('#','!'))]
   data={k.strip():v.strip() for k,v in lines}
-  existing_ports={int(data.get('server-port','25565'))}
-  if data.get('enable-rcon')=='true': existing_ports.add(int(data.get('rcon.port','25575')))
-  if existing_ports.intersection((s['port'],s['rconPort'],s['corePort'])): raise SystemExit('Konflikt portów zapisanej instancji')
+  existing_ports={int(data.get('server-port','25565')):'gra'}
+  if data.get('enable-rcon')=='true': existing_ports[int(data.get('rcon.port','25575'))]='RCON'
+  for key,role in (('port','gra'),('rconPort','RCON'),('corePort','Core API')):
+   port=s[key]
+   if port in existing_ports: raise SystemExit(f"Port {port} ({role}) jest używany przez {item['name']} ({existing_ports[port]}). Wybierz inny port.")
 sockets=[]
+installed=[]
+paper_build=None
 try:
  for port in (s['port'],s['rconPort'],s['corePort']):
   for family,host in ((socket.AF_INET,'0.0.0.0'),(socket.AF_INET6,'::')):
@@ -123,7 +127,7 @@ try:
    art=stable['downloads']['server:default']
    download(art['url'],Path(stage)/'server.jar',art.get('checksums',{}))
    (Path(stage)/'plugins').mkdir(mode=0o700)
-   installed=[]
+   paper_build=stable.get('id')
    for key in chosen:
     query=urllib.parse.urlencode({'game_versions':json.dumps(['26.3']),'loaders':json.dumps(['paper']),'include_changelog':'false'})
     versions=fetch('https://api.modrinth.com/v2/project/'+key+'/version?'+query)
@@ -136,7 +140,8 @@ try:
     installed.append(allowed[key]+' '+str(releases[0]['version_number']))
    def write(name,data):
     with open(os.path.join(stage,name),'x',encoding='utf-8') as f:f.write(data);f.flush();os.fsync(f.fileno())
-   write('server.properties','server-port='+str(s['port'])+'\nonline-mode=true\nenable-rcon=false\nrcon.port='+str(s['rconPort'])+'\nenable-query=false\nmotd=RawCore Survival 26.3\nlevel-name=world\n')
+   motd=s['name'].replace('\r',' ').replace('\n',' ').replace('\\','\\\\')
+   write('server.properties','server-port='+str(s['port'])+'\nonline-mode=true\nenable-rcon=false\nrcon.port='+str(s['rconPort'])+'\nenable-query=false\nmotd='+motd+'\nlevel-name=world\n')
    write('eula.txt','eula=false\n')
    write('ecosystem.config.json',json.dumps({'apps':[{'name':s['minecraftProcess'],'cwd':root,'script':s['java'],'interpreter':'none','args':['-Xms512M','-Xmx'+str(s['ram'])+'M','-jar','server.jar','--nogui'],'autorestart':True,'max_restarts':10}]},indent=2)+'\n')
    write('.rawcraft-panel-created',json.dumps({'id':s['id'],'process':s['minecraftProcess'],'version':'26.3','plugins':chosen})+'\n')
@@ -144,7 +149,7 @@ try:
    os.mkdir(root,0o700)
    for name in os.listdir(stage):os.rename(os.path.join(stage,name),os.path.join(root,name))
   finally:shutil.rmtree(stage,ignore_errors=True)
- print(json.dumps({'prepared':action=='create','started':False,'path':root,'javaVersion':version[:220],'plugins':chosen,'ram':s['ram'],'version':'Paper 26.3','database':'Brak — Core zainstalujesz osobno','process':s['minecraftProcess']}))
+ print(json.dumps({'prepared':action=='create','started':False,'path':root,'javaVersion':version[:220],'plugins':chosen,'installedPlugins':installed,'paperBuild':paper_build,'ram':s['ram'],'version':'Paper 26.3','database':'Brak — Core zainstalujesz osobno','process':s['minecraftProcess']}))
 finally:
  for sock in sockets:sock.close()
 `

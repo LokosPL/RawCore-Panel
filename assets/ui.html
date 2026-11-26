@@ -287,7 +287,7 @@ dialog.palette::backdrop{background:#03050899;backdrop-filter:blur(4px)}
  <main class="main"><header class="topbar"><button class="mobilemenu" onclick="$('sidebar').classList.toggle('open')" aria-label="Otwórz menu"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg></button><div class="crumb">RAWCRAFT Control &nbsp; / &nbsp; <b id="crumbtitle">Panel zarządzania</b></div><div class="row"><button id="paletteopen" type="button" class="palettebtn" onclick="openPalette()" aria-label="Szukaj i szybkie akcje (Ctrl+K)" title="Szukaj i szybkie akcje (Ctrl+K)"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Szukaj…</span><kbd>Ctrl K</kbd></button><select id="quickscale" class="scalecontrol" aria-label="Skala interfejsu" onchange="chooseScale(this.value)"><option value="auto">Skala: auto</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option><option value="175">175%</option><option value="200">200%</option></select><select id="quicktheme" class="themecontrol" aria-label="Motyw" onchange="chooseTheme(this.value)"><option value="system">Motyw systemowy</option><option value="dark">Ciemny</option><option value="light">Jasny</option></select><span id="permissionsbadge" class="permissionsbadge"></span><span id="sshbadge" class="sshbadge"><i class="dot"></i> Połączenie SSH</span><div class="bellwrap"><button id="notificationsbtn" class="bellbutton" aria-label="Powiadomienia" aria-expanded="false" onclick="toggleNotifications()"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" > <path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /> </svg><span id="notificationcount" class="bellcount hide"></span></button><div id="notificationpanel" class="notificationpanel hide"><div class="cardhead"><h3>Powiadomienia</h3><button class="compact" onclick="markNotificationsRead()">Oznacz przeczytane</button></div><div id="notificationlist" class="notificationlist"></div><div class="pad monitorhint" id="monitorstatus">Monitoring aktywny</div></div></div><span class="avatar" id="avatar">RC</span></div></header><div class="content"><div class="pagehead"><div><h1 id="pageTitle">Panel zarządzania</h1><p id="pageSubtitle">Wszystkie usługi Twojego VPS w jednym miejscu.</p></div></div><div id="statuserror" class="alert error hide" role="alert"></div>
  <div class="card pad" id="instancebar" style="margin-bottom:18px"><div class="row"><label for="instanceselect">Instancja Minecraft</label><select id="instanceselect" style="max-width:320px" onchange="switchInstance(this.value)"></select><button onclick="openInstanceWizard()">+ Nowa instancja</button></div><p id="instancehint" class="hint"></p></div>
  <div id="configfix" class="configfix hide" role="alert"></div>
- <section id="tab-dashboard"><div class="dashboardhero" id="healthhero" data-health="pending"><div class="dashboardhero-copy"><span class="dashboard-kicker"><span class="signal-dot"></span> <span id="herogreeting">CENTRUM OPERACYJNE</span></span><h2 id="herotitle">Sprawdzanie usług…</h2><p id="herosummary">Panel pobiera stan usług i zasobów VPS.</p><div id="herochips" class="herochips"></div><div class="dashboard-actions"><button type="button" class="primary" onclick="showTab('terminal')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>Terminal SSH</button><button type="button" class="dashboard-outline" onclick="showTab('console')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>Konsola</button><button type="button" class="dashboard-outline" onclick="showTab('files')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Pliki</button><button type="button" class="dashboard-outline heroquick" onclick="openPalette()"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Szybkie akcje <kbd>Ctrl K</kbd></button></div></div><div class="dashboardhero-art" aria-hidden="true"><div class="healthring"><svg viewBox="0 0 120 120"><circle class="ringbg" cx="60" cy="60" r="52"/><circle id="heroring" class="ringfg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73"/></svg><div class="ringlabel"><strong id="heroringvalue">—</strong><small>usług online</small></div></div></div></div><div id="instancecards" class="diskrows" style="margin-bottom:20px"></div><div class="stats"><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg></div><div><small>Wszystkie usługi</small><strong id="statAll">—</strong></div></div><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div><div><small>Usługi online</small><strong id="statOnline">—</strong></div></div><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></div><div><small>Użycie pamięci VPS</small><strong id="statRam">—</strong></div></div><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><small>Czas pracy VPS</small><strong id="statUptime">—</strong></div></div></div><div class="sectionheading"><h3>Twoje usługi</h3></div><div id="services" class="servicegrid"><div class="card empty">Pobieranie usług…</div></div><div class="vpsgrid"><div class="card"><div class="cardhead"><h3>Parametry VPS</h3><span class="tag online">MONITORING</span></div><div id="vpsmetrics" class="metriclist"><div class="empty">Oczekiwanie na dane</div></div></div><div class="card"><div class="cardhead"><h3>Twój serwer</h3><span class="cardheadicon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg></span></div><div id="vpsfacts" style="padding:0 20px"></div><div class="quicklinks"><button onclick="showTab('files')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Pliki</button><button onclick="showTab('console')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>Konsola</button><button onclick="showTab('backups')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>Kopie</button></div></div></div><div class="card pad diskdetail"><div class="row between"><h3>Co zajmuje miejsce na dysku?</h3></div><div id="diskusage" class="diskrows"><p class="hint">Obliczanie zajętego miejsca…</p></div><p class="diskhint">Rozmiary na dysku obejmują pliki usługi i jej podfoldery. Wspólne lub zagnieżdżone katalogi mogą zawierać te same dane — nie sumuj ich.</p></div></section>
+ <section id="tab-dashboard"><div class="dashboardhero" id="healthhero" data-health="pending"><div class="dashboardhero-copy"><span class="dashboard-kicker"><span class="signal-dot"></span> <span id="herogreeting">CENTRUM OPERACYJNE</span></span><h2 id="herotitle">Sprawdzanie usług…</h2><p id="herosummary">Panel pobiera stan usług i zasobów VPS.</p><div id="herochips" class="herochips"></div><div class="dashboard-actions"><button type="button" class="primary" onclick="showTab('terminal')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 11 2-2-2-2"/><path d="M11 13h4"/><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/></svg>Terminal SSH</button><button type="button" class="dashboard-outline" onclick="showTab('console')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>Konsola</button><button type="button" class="dashboard-outline" onclick="showTab('files')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Pliki</button><button type="button" class="dashboard-outline heroquick" onclick="openPalette()"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Szybkie akcje <kbd>Ctrl K</kbd></button></div></div><div class="dashboardhero-art" aria-hidden="true"><div class="healthring"><svg viewBox="0 0 120 120"><circle class="ringbg" cx="60" cy="60" r="52"/><circle id="heroring" class="ringfg" cx="60" cy="60" r="52" stroke-dasharray="326.73" stroke-dashoffset="326.73"/></svg><div class="ringlabel"><strong id="heroringvalue">—</strong><small>usług online</small></div></div></div></div><section id="instancenetwork" class="hide" aria-labelledby="instancenetworktitle"><div class="sectionheading"><h3 id="instancenetworktitle">Serwery Minecraft i proxy</h3><span id="instancenetworktime" class="hint"></span></div><div id="instancecards" class="diskrows" style="margin-bottom:20px"></div></section><div class="stats"><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg></div><div><small>Wszystkie usługi</small><strong id="statAll">—</strong></div></div><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div><div><small>Usługi online</small><strong id="statOnline">—</strong></div></div><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></div><div><small>Użycie pamięci VPS</small><strong id="statRam">—</strong></div></div><div class="card stat"><div class="staticon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><small>Czas pracy VPS</small><strong id="statUptime">—</strong></div></div></div><div class="sectionheading"><h3>Twoje usługi</h3></div><div id="services" class="servicegrid"><div class="card empty">Pobieranie usług…</div></div><div class="vpsgrid"><div class="card"><div class="cardhead"><h3>Parametry VPS</h3><span class="tag online">MONITORING</span></div><div id="vpsmetrics" class="metriclist"><div class="empty">Oczekiwanie na dane</div></div></div><div class="card"><div class="cardhead"><h3>Twój serwer</h3><span class="cardheadicon"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg></span></div><div id="vpsfacts" style="padding:0 20px"></div><div class="quicklinks"><button onclick="showTab('files')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Pliki</button><button onclick="showTab('console')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>Konsola</button><button onclick="showTab('backups')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>Kopie</button></div></div></div><div class="card pad diskdetail"><div class="row between"><h3>Co zajmuje miejsce na dysku?</h3></div><div id="diskusage" class="diskrows"><p class="hint">Obliczanie zajętego miejsca…</p></div><p class="diskhint">Rozmiary na dysku obejmują pliki usługi i jej podfoldery. Wspólne lub zagnieżdżone katalogi mogą zawierać te same dane — nie sumuj ich.</p></div></section>
  <section id="tab-manage" class="hide"><div id="selectedservice"></div><div class="card section pad"><h3>Szybki dostęp</h3><p style="font-size:12px">Logi, konfiguracja i kopie Twojego serwera.</p><div class="row"><button class="quickbtn" onclick="showTab('console')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>Konsola i logi</button><button class="quickbtn" onclick="showTab('files')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Pliki serwera</button><button class="quickbtn" onclick="openConfiguration()"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>server.properties</button><button class="quickbtn" onclick="showTab('backups')"><svg aria-hidden="true" class="uiicon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>Kopie zapasowe</button></div></div></section>
  <section id="tab-console" class="hide"><div class="card"><div class="cardhead"><h3>Konsola i logi serwera</h3><div class="row"><select id="logservice" aria-label="Usługa do podglądu logów" onchange="changeLogService()" style="width:auto;max-width:200px;padding:6px 10px"></select><button id="followbtn" class="compact" onclick="resumeLogFollow()">↓ Śledź logi</button><button id="pausebtn" class="compact" onclick="toggleLogPause()">Ⅱ Pauza</button><button class="compact" onclick="clearLogs()">Wyczyść widok</button></div></div><div class="consoleTabs"><button id="logtab-pm2" class="compact active" onclick="setLogSource('pm2')">›_ &nbsp; Konsola PM2</button><button id="logtab-latest" class="compact" onclick="setLogSource('latest')">▤ &nbsp; latest.log</button><span id="loghint" class="hint" style="margin:auto 0 auto auto">Odświeżanie co 2 s</span></div><div class="consolepad"><div class="row" style="margin-bottom:10px;height:34px;overflow:hidden"><span id="logpending" class="lognotice hide">Nowe logi czekają — przewinięty widok i zaznaczenie pozostają bez zmian.</span><span id="logerror" class="errorline hide"></span></div><div class="consolelegend"><span>● Informacja</span><span class="warning">● Ostrzeżenie</span><span class="error">● Błąd / awaria</span></div><pre class="term" id="consoleout" aria-label="Logi serwera">Wybierz usługę.</pre><form id="mccommandform" class="commandrow"><input id="mccommand" placeholder="Komenda bez /, np. core edycja backup lub core pamiec" aria-label="Komenda Minecraft" autocomplete="off"><button id="sendmc" class="primary" type="submit">Wyślij ↵</button></form><div id="rconhint" class="hint" style="margin-top:9px">Komendy Minecraft korzystają z RCON przez SSH. Włącz RCON w server.properties. Hasło RCON pozostaje na VPS. Odpowiedź „nieznana komenda” pochodzi z serwera/pluginu; komendy wpisuj jak w konsoli Minecraft, np. corestatus zamiast core status.</div><div id="rconreply" class="notice hide" style="margin-top:10px;white-space:pre-wrap"></div></div></div></section>
  <section id="tab-files" class="hide"><div class="card"><div class="cardhead"><h3>Pliki na VPS</h3><span class="hint">Odczyt i zapis przez SSH</span></div><div class="pad"><form id="pathform" class="pathrow"><input id="path" value="/opt/minecraft/server" aria-label="Ścieżka katalogu"><button type="submit">Otwórz</button></form><div class="toolbar section"><button class="compact" onclick="parentDir()">↑ Wyżej</button><button class="compact" onclick="loadFiles()">↻ Odśwież</button><button class="compact" onclick="mkdirPrompt()">+ Nowy folder</button><label for="uploadfile" class="upload compact" style="margin:0">↑ Prześlij plik</label><input id="uploadfile" type="file" class="hide" onchange="uploadFile(event)"><label for="uploadfolder" class="upload compact" style="margin:0">↑ Prześlij folder</label><input id="uploadfolder" type="file" webkitdirectory directory multiple class="hide" onchange="uploadFolder(event)"><small id="filehint"></small></div><progress id="uploadprogress" class="hide" max="100"></progress></div><div class="tablewrap"><table class="filelist"><thead><tr><th>Nazwa pliku</th><th>Rozmiar</th><th>Ostatnia zmiana</th><th>Akcje</th></tr></thead><tbody id="filetbody"></tbody></table></div></div><div id="editorbox" class="card pad section hide"><div class="row between"><h3 id="editorname">Edytor</h3><button class="compact" onclick="closeEditor()">Zamknij</button></div><p class="hint">Duże pliki otwierają się fragmentami po 256 kB. Zapis zmienia wyłącznie widoczny fragment i tworzy kopię całego pliku .rawcraft.bak.</p><div class="toolbar"><button id="editorprev" class="compact" onclick="previousChunk()">← Poprzedni fragment</button><button id="editornext" class="compact" onclick="nextChunk()">Następny fragment →</button><select id="editormode" aria-label="Tryb edycji" onchange="switchEditorMode()" style="width:auto"><option value="text">Tekst UTF-8</option><option value="hex">Bajty HEX</option></select><small id="editorrange"></small></div><textarea id="editor" class="editor" spellcheck="false" aria-label="Treść pliku"></textarea><div class="row section"><button id="savebtn" class="primary" onclick="saveFile()">Zapisz na VPS</button><small id="editorstatus"></small></div></div></section>
@@ -315,6 +315,7 @@ dialog.palette::backdrop{background:#03050899;backdrop-filter:blur(4px)}
 <h2>Nowy serwer Paper 26.3</h2>
 <p class="hint">Wybierz pluginy — panel pobierze stabilne, kompatybilne wersje i sprawdzi sumy kontrolne. Nie nadpisujemy istniejącego świata ani działającego serwera. Start dopiero po akceptacji EULA.</p>
 <form id="instanceform">
+ <div id="wizardstatus" class="card pad hide" style="margin:12px 0"><strong id="wizardmessage" role="status"></strong> <span id="wizardelapsed" class="hint"></span></div>
 <div class="accountgrid">
 <div>
 <label>ID serwera<input id="newinstanceid" required pattern="[a-z0-9][a-z0-9_-]{0,31}" value="survival"></label>
@@ -364,7 +365,85 @@ let rawcoreService=null,rawcoreBusy=false;
 const instanceEndpoints=new Set(['/api/status','/api/monitor','/api/payments/status','/api/action','/api/logs','/api/files','/api/read','/api/save','/api/upload','/api/download','/api/delete','/api/mkdir','/api/backups','/api/latest-log','/api/minecraft/command','/api/terminal','/api/shell']);
 function instanceQuery(){return activeInstance?'&instance='+encodeURIComponent(activeInstance.id)+'&revision='+encodeURIComponent(activeInstance.revision||''):''}
 function applyInstance(item){activeInstance=item;prefs.serverPath=item.serverPath;prefs.minecraftProcess=item.minecraftProcess;prefs.wwwProcess=item.wwwProcess||prefs.wwwProcess||'www';safeStorage('rawcraft-instance:'+prefs.host,item.id);renderInstanceChoices()}
-function renderInstanceChoices(){let select=$('instanceselect');select.replaceChildren();for(let item of instanceItems){let option=document.createElement('option');option.value=item.id;option.textContent=item.name;option.selected=item.id===activeInstance?.id;select.append(option)}$('instancehint').textContent=activeInstance?(activeInstance.id==='vps'?'SSH · katalog domowy VPS':activeInstance.serverPath+' · PM2 '+activeInstance.minecraftProcess+' · '+(activeInstance.port||'port z server.properties')):'';$('instancecards').replaceChildren();for(let item of instanceItems){if(item.id==='vps')continue;let card=document.createElement('div');card.className='card pad';let name=document.createElement('strong'),detail=document.createElement('p');let isActive=item.id===activeInstance?.id;name.textContent=item.name;if(isActive){card.classList.add('activeinstance');let badge=document.createElement('span');badge.className='tag online';badge.textContent='Aktywna';name.append(' ',badge)}detail.textContent=item.serverPath+' · '+item.minecraftProcess;let actions=document.createElement('div');actions.className='row';let choose=document.createElement('button');choose.type='button';choose.textContent=isActive?'Wybrana':'Wybierz';choose.disabled=isActive;choose.onclick=()=>switchInstance(item.id);let remove=document.createElement('button');remove.type='button';remove.textContent='Usuń z panelu';remove.setAttribute('data-remove-instance',item.id);remove.onclick=()=>removeInstance(item.id);actions.append(choose,remove);card.append(name,detail,actions);$('instancecards').append(card)}}
+let networkProcesses={},networkObservedAt=0,networkStale=false;
+function renderInstanceChoices(){
+ const select=$('instanceselect');
+ select.replaceChildren();
+ for(const item of instanceItems){
+  const option=document.createElement('option');
+  option.value=item.id;
+  option.textContent=item.name;
+  option.selected=item.id===activeInstance?.id;
+  select.append(option);
+ }
+ $('instancehint').textContent=activeInstance?(activeInstance.id==='vps'?'SSH · katalog domowy VPS':activeInstance.serverPath+' · PM2 '+activeInstance.minecraftProcess+' · '+(activeInstance.port||'port z server.properties')):'';
+ renderInstanceCards();
+}
+function instanceStatusBadge(process){
+ const state=Object.hasOwn(networkProcesses,process)?networkProcesses[process]:'';
+ const states={online:'Uruchomiony',stopped:'Zatrzymany',stopping:'Zatrzymywanie',launching:'Uruchamianie',errored:'Błąd procesu',missing:'Brak procesu PM2'};
+ const badge=document.createElement('span');
+ badge.className='tag '+(state==='online'&&!networkStale?'online':'offline');
+ badge.textContent=(Object.hasOwn(states,state)?states[state]:'Stan nieznany');
+ return badge;
+}
+function renderInstanceCards(){
+ const container=$('instancecards');
+ const list=$('instancenetwork');
+ const updated=$('instancenetworktime');
+ updated.textContent=networkObservedAt?
+  (networkStale?'Odczyt nieaktualny · ':'Ostatni odczyt PM2 · ')+new Date(networkObservedAt).toLocaleTimeString('pl-PL'):
+  'Oczekiwanie na odczyt PM2';
+ const items=instanceItems.filter(item=>item.id!=='vps');
+ list.classList.toggle('hide',!items.length&&!networkObservedAt);
+ const snapshot=JSON.stringify([items,activeInstance?.id,networkProcesses,networkStale,!!networkObservedAt]);
+ if(container.dataset.snapshot===snapshot)return;
+ container.dataset.snapshot=snapshot;
+ container.replaceChildren();
+ for(const item of items){
+  const card=document.createElement('div');
+  card.className='card pad';
+  const name=document.createElement('strong'),detail=document.createElement('p');
+  const isActive=item.id===activeInstance?.id;
+  name.textContent=item.name;
+  name.append(' ',instanceStatusBadge(item.minecraftProcess));
+  if(isActive)card.classList.add('activeinstance');
+  detail.textContent=item.serverPath+' · PM2 '+item.minecraftProcess+' · '+(item.port?'port '+item.port:'port z server.properties');
+  const actions=document.createElement('div');
+  actions.className='row';
+  const choose=document.createElement('button');
+  choose.type='button';
+  choose.textContent=isActive?'Wybrana':'Wybierz';
+  choose.disabled=isActive;
+  choose.onclick=()=>switchInstance(item.id);
+  const remove=document.createElement('button');
+  remove.type='button';
+  remove.textContent='Usuń z panelu';
+  remove.setAttribute('data-remove-instance',item.id);
+  remove.onclick=()=>removeInstance(item.id);
+  actions.append(choose,remove);
+  if(!networkStale&&networkProcesses[item.minecraftProcess]==='missing'&&item.version==='Paper 26.3'){
+   const resume=document.createElement('button');
+   resume.type='button';
+   resume.textContent='Dokończ uruchomienie';
+   resume.onclick=()=>openInstanceWizard(item);
+   actions.prepend(resume);
+  }
+  card.append(name,detail,actions);
+  container.append(card);
+ }
+ if(networkObservedAt){
+  const proxy=['rawcraft-velocity','velocity'].find(name=>networkProcesses[name]&&networkProcesses[name]!=='missing')||'rawcraft-velocity';
+  const card=document.createElement('div');
+  card.className='card pad';
+  const name=document.createElement('strong'),detail=document.createElement('p');
+  name.textContent='Velocity';
+  name.append(' ',instanceStatusBadge(proxy));
+  detail.textContent='PM2 '+proxy;
+  card.append(name,detail);
+  container.append(card);
+ }
+}
 async function removeInstance(id){let item=instanceItems.find(i=>i.id===id);if(!item||instanceMutations||transfers||actionBusy||editorBusy)return;if(!await ask('Usunąć wpis z panelu?',item.name+' — usunięte zostaną tylko zapisane ustawienia instancji. Nie kasujemy plików ani usług VPS.','Usuń wpis'))return;if(!await mayDiscardEditor())return;instanceMutations++;try{await desktopTerminal.close();await api('/api/instances/remove',{id});activeInstance=null;await loadInstanceChoices();await showTab('dashboard');toast('Usunięto '+item.name+' z panelu. Pliki na VPS nie zostały zmienione.')}catch(e){if(!e?.stale)toast('Nie udało się usunąć wpisu: '+e.message,true)}finally{instanceMutations--}}
 async function loadInstanceChoices(){let data=await api('/api/instances');instanceItems=data.instances||[];let id=activeInstance?.id||safeStorage('rawcraft-instance:'+prefs.host);let item=instanceItems.find(i=>i.id===id)||instanceItems[0];if(item)applyInstance(item)}
 async function switchInstance(id){let item=instanceItems.find(i=>i.id===id);if(!item||item.id===activeInstance?.id)return;if(transfers||actionBusy||editorBusy||accountBusy||instanceMutations||instanceWizardBusy){$('instanceselect').value=activeInstance.id;toast('Poczekaj na zakończenie operacji bieżącej instancji.',true);return}if(!await mayDiscardEditor()){$('instanceselect').value=activeInstance.id;return}await desktopTerminal.close();session++;filesSerial++;logsSerial++;processes=[];metrics={};selectedID=null;selectedKind='minecraft';monitorData={services:[],disks:[]};notificationHistory=[];monitorLast=0;refreshBusy=false;logsBusy=false;paymentsBusy=false;lastLogSnapshot='';pendingLogText=null;logViewKey='';logPaused=false;editPath='';editorChunk=null;editHistory=[];closeEditor(true);$('editor').value='';$('filetbody').replaceChildren();$('backuptbody').replaceChildren();$('backupfolder').textContent='';$('consoleout').textContent='';$('rconreply').replaceChildren();$('rconreply').classList.add('hide');$('terminalout').textContent='';$('filehint').textContent='';$('paymentfacts').replaceChildren();$('paymentavailability').textContent='Status nieznany dla wybranej instancji';$('paymentchecked').textContent='';$('paymenterror').classList.add('hide');$('logerror').classList.add('hide');$('statuserror').classList.add('hide');applyInstance(item);$('path').value=item.serverPath;loadNotificationHistory();renderServices();renderMetrics();await showTab(activeTab);refresh()}
@@ -379,65 +458,168 @@ function syncCatalogPlugins(changed){
 }
 document.querySelectorAll('.catalogplugin').forEach(el=>el.addEventListener('change',()=>{syncCatalogPlugins(el.value);instancePlan=null;$('instancecreate').classList.add('hide')}));
 function wizardRequest(){return {instance:{id:$('newinstanceid').value.trim(),name:$('newinstancename').value.trim(),serverPath:$('newinstancepath').value.trim(),minecraftProcess:$('newinstanceprocess').value.trim(),wwwProcess:'',port:Number($('newinstanceport').value),rconPort:Number($('newinstancercon').value),corePort:Number($('newinstancecore').value),java:$('newinstancejava').value.trim(),ram:Number($('newinstanceram').value),version:'Paper 26.3'},plugins:catalogSelectedPlugins()}}
-function renderInstancePlan(result,request){let item=request.instance;$('instanceplan').textContent=[result.prepared?'Paper i pluginy pobrano. Serwer jeszcze nie jest uruchomiony.':'Sprawdzono katalog, Java i porty. Możesz pobrać pliki.',item.name+' ('+item.id+')','Katalog: '+item.serverPath,'Proces PM2: '+item.minecraftProcess,'Port gry: '+item.port+' (25565 pozostaje zajęty przez poprzedni serwer)','Silnik: Paper 26.3 · Java: '+item.java+(result.javaVersion?'\n'+result.javaVersion.trim():''),'RAM: '+item.ram+' MB','Pluginy: '+(request.plugins.length?request.plugins.join(', '):'bez pluginów'),'RCON jest wyłączony; MySQL i plugin RawCore konfigurujemy osobno.','EULA: osobna akceptacja przed startem.'].join('\n')}
-function openInstanceWizard(){
+let suggestedInstanceID='',wizardTimer=null;
+function setWizardStatus(message,busy=false){
+ clearInterval(wizardTimer);
+ const box=$('wizardstatus'),elapsed=$('wizardelapsed');
+ box.classList.toggle('hide',!message);
+ $('wizardmessage').textContent=message;
+ elapsed.textContent='';
+ $('instanceplan').setAttribute('aria-busy',String(busy));
+ if(busy){
+  const start=Date.now();
+  const update=()=>elapsed.textContent=Math.floor((Date.now()-start)/1000)+' s';
+  update();
+  wizardTimer=setInterval(update,1000);
+ }
+}
+function syncWizardControls(){
+ const locked=instanceWizardBusy||!!preparedCatalogInstance;
+ for(const field of $('instanceform').querySelectorAll('input:not(#instanceeulacheck)'))field.disabled=locked;
+ $('instancepreview').disabled=locked;
+ $('instancecreate').disabled=locked;
+ $('instancestart').disabled=instanceWizardBusy;
+ $('instanceeulacheck').disabled=instanceWizardBusy;
+}
+function renderInstancePlan(result,request){
+ const item=request.instance;
+ const plugins=result.prepared&&Array.isArray(result.installedPlugins)?result.installedPlugins:request.plugins;
+ $('instanceplan').textContent=[
+  result.prepared?'Paper i pluginy pobrano. Serwer czeka na akceptację EULA.':'Sprawdzono katalog, Javę i porty. Możesz pobrać pliki.',
+  item.name+' ('+item.id+')',
+  'Katalog: '+item.serverPath,
+  'Proces PM2: '+item.minecraftProcess,
+  'Port gry: '+item.port+' · RCON (wyłączony): '+item.rconPort+' · Rezerwacja Core API: '+item.corePort,
+  'Silnik: Paper 26.3'+(result.paperBuild?' · build '+result.paperBuild:'')+' · Java: '+item.java,
+  ...(result.javaVersion?[result.javaVersion.trim()]:[]),
+  'RAM: '+item.ram+' MB',
+  'Pluginy: '+(plugins.length?plugins.join(', '):'bez pluginów')
+ ].join('\n');
+}
+function suggestedInstancePath(id){return '/home/'+prefs.user+'/rawcore-servers/'+id}
+function openInstanceWizard(prepared=null){
  if(!connected){toast('Najpierw połącz się z VPS.',true);return}
- instancePlan=null;preparedCatalogInstance=null;
- let next='survival',i=2;while(instanceItems.some(x=>x.id===next))next='survival'+i++;
- $('newinstanceid').value=next;$('newinstancename').value='RawCore Survival';
- $('newinstancepath').value='/home/'+prefs.user+'/rawcore-servers/'+next;
- $('newinstanceprocess').value='minecraft-'+next;
- let ports=new Set(instanceItems.flatMap(x=>[x.port,x.rconPort,x.corePort]));let game=25566;
+ instancePlan=null;
+ preparedCatalogInstance=prepared?{id:prepared.id,revision:prepared.revision}:null;
+ let next='lobby',index=2;
+ while(instanceItems.some(item=>item.id===next))next='lobby-'+index++;
+ suggestedInstanceID=prepared?.id||next;
+ $('newinstanceid').value=suggestedInstanceID;
+ $('newinstancename').value=prepared?.name||(next==='lobby'?'RawCraft Lobby':'RawCraft Lobby '+(index-1));
+ $('newinstancepath').value=prepared?.serverPath||suggestedInstancePath(next);
+ $('newinstanceprocess').value=prepared?.minecraftProcess||'minecraft-'+next;
+ const ports=new Set(instanceItems.flatMap(item=>[item.port,item.rconPort,item.corePort]));
+ let game=25566,rcon=25576,core=8767;
  while(ports.has(game))game++;
- let rcon=25576;while(ports.has(rcon)||rcon===game)rcon++;
- let core=8767;while(ports.has(core)||core===game||core===rcon)core++;
- $('newinstanceport').value=game;$('newinstancercon').value=rcon;$('newinstancecore').value=core;
- $('newinstancejava').value='/opt/rawcore-java25/bin/java';$('newinstanceram').value=4096;
- document.querySelectorAll('.catalogplugin').forEach(el=>el.checked=true);
- $('instancecreate').classList.add('hide');$('instanceeulabox').classList.add('hide');
- $('instanceeulacheck').checked=false;$('instancestart').disabled=false;
- $('instanceplan').textContent='';
+ while(ports.has(rcon)||rcon===game)rcon++;
+ while(ports.has(core)||core===game||core===rcon)core++;
+ $('newinstanceport').value=prepared?.port||game;
+ $('newinstancercon').value=prepared?.rconPort||rcon;
+ $('newinstancecore').value=prepared?.corePort||core;
+ $('newinstancejava').value=prepared?.java||'/opt/rawcore-java25/bin/java';
+ $('newinstanceram').value=prepared?.ram||3072;
+ for(const field of document.querySelectorAll('.catalogplugin'))field.checked=['viaversion','viabackwards'].includes(field.value);
+ $('instancecreate').classList.add('hide');
+ $('instanceeulabox').classList.toggle('hide',!prepared);
+ $('instanceeulacheck').checked=false;
+ $('instanceplan').textContent=prepared?'Panel zweryfikuje pliki '+prepared.name+' przed uruchomieniem.':'';
+ setWizardStatus(prepared?'Dokończ uruchomienie instancji.':'');
+ syncWizardControls();
  $('instancewizard').showModal();
 }
 function closeInstanceWizard(){if(!instanceWizardBusy)$('instancewizard').close()}
-$('instanceform').addEventListener('input',()=>{instancePlan=null;$('instancecreate').classList.add('hide')});
+$('instancewizard').addEventListener('cancel',event=>{if(instanceWizardBusy)event.preventDefault()});
+$('instanceform').addEventListener('input',event=>{
+ if(event.target.id==='instanceeulacheck')return;
+ if(event.target.id==='newinstanceid'){
+  const id=event.target.value.trim();
+  if(/^[a-z0-9][a-z0-9_-]{0,31}$/.test(id)){
+   if($('newinstancepath').value===suggestedInstancePath(suggestedInstanceID))$('newinstancepath').value=suggestedInstancePath(id);
+   if($('newinstanceprocess').value==='minecraft-'+suggestedInstanceID)$('newinstanceprocess').value='minecraft-'+id;
+   suggestedInstanceID=id;
+  }
+ }
+ instancePlan=null;
+ $('instancecreate').classList.add('hide');
+ $('instanceplan').textContent='';
+ setWizardStatus('');
+});
 $('instanceform').addEventListener('submit',async event=>{
- event.preventDefault();if(instanceWizardBusy)return;instanceWizardBusy=true;
- try{let request=wizardRequest(),result=await api('/api/instances/catalog',{...request,action:'preview'});instancePlan={request,hash:result.planHash};renderInstancePlan(result,request);$('instancecreate').classList.remove('hide');$('instanceeulabox').classList.add('hide')}
- catch(error){if(!error?.stale)$('instanceplan').textContent=error.message}
- finally{instanceWizardBusy=false}
+ event.preventDefault();
+ if(instanceWizardBusy||preparedCatalogInstance)return;
+ const request=wizardRequest();
+ instancePlan=null;
+ $('instancecreate').classList.add('hide');
+ $('instanceplan').textContent='';
+ instanceWizardBusy=true;
+ setWizardStatus('Sprawdzanie katalogu, Javy i portów na VPS…',true);
+ syncWizardControls();
+ try{
+  const result=await api('/api/instances/catalog',{...request,action:'preview'});
+  instancePlan={request,hash:result.planHash};
+  renderInstancePlan(result,request);
+  $('instancecreate').classList.remove('hide');
+  setWizardStatus('Plan zweryfikowany.');
+ }catch(error){
+  setWizardStatus('Nie udało się zweryfikować planu.');
+  $('instanceplan').textContent=error.message;
+ }finally{
+  instanceWizardBusy=false;
+  syncWizardControls();
+ }
 });
 async function prepareInstance(){
- if(instanceWizardBusy||!instancePlan)return;let plan=instancePlan;instanceWizardBusy=true;
- $('instancecreate').disabled=true;
+ if(instanceWizardBusy||!instancePlan)return;
+ const plan=instancePlan;
+ instanceWizardBusy=true;
+ setWizardStatus('Pobieranie Paper i pluginów oraz sprawdzanie sum na VPS…',true);
+ syncWizardControls();
  try{
-  let result=await api('/api/instances/catalog',{...plan.request,action:'create',planHash:plan.hash},315000);
+  const result=await api('/api/instances/catalog',{...plan.request,action:'create',planHash:plan.hash},315000);
   renderInstancePlan(result,plan.request);
-  instancePlan=null;$('instancecreate').classList.add('hide');
+  instancePlan=null;
+  $('instancecreate').classList.add('hide');
+  setWizardStatus('Pliki zapisane. Aktualizowanie listy instancji…',true);
   await loadInstanceChoices();
-  let match=instanceItems.find(i=>i.id===plan.request.instance.id);
-  if(!match)throw Error('Pliki zapisano, ale nie znaleziono nowej instancji na liście. Odśwież panel.');
+  const match=instanceItems.find(item=>item.id===plan.request.instance.id);
+  if(!match)throw Error('Pliki zapisano, ale brakuje instancji na liście. Odśwież panel.');
   preparedCatalogInstance={id:match.id,revision:match.revision};
-  $('instanceeulacheck').checked=false;$('instanceeulabox').classList.remove('hide');
-  toast('Paper i pluginy pobrane. Akceptacja EULA jest wymagana przed startem.');
- }catch(error){if(!error?.stale)$('instanceplan').textContent=error.message}
- finally{instanceWizardBusy=false;$('instancecreate').disabled=false}
+  $('instanceeulacheck').checked=false;
+  $('instanceeulabox').classList.remove('hide');
+  setWizardStatus('Przygotowano pliki. Oczekiwanie na EULA.');
+ }catch(error){
+  setWizardStatus('Nie udało się zakończyć przygotowania.');
+  $('instanceplan').textContent=error.message;
+ }finally{
+  instanceWizardBusy=false;
+  syncWizardControls();
+ }
 }
 async function startPreparedInstance(){
  if(instanceWizardBusy||!preparedCatalogInstance)return;
  if(!$('instanceeulacheck').checked){toast('Przeczytaj i zaakceptuj EULA Minecraft.',true);return}
  if(!await ask('Uruchomić Paper 26.3?','Zarejestrujemy nowy proces w PM2. Upewnij się, że wybrany port jest wolny.','Uruchom'))return;
- instanceWizardBusy=true;$('instancestart').disabled=true;
+ const prepared=preparedCatalogInstance;
+ instanceWizardBusy=true;
+ setWizardStatus('Rejestrowanie i uruchamianie procesu w PM2…',true);
+ syncWizardControls();
+ let choice=null;
  try{
-  let output=await api('/api/instances/catalog-start',{...preparedCatalogInstance,eulaAccepted:true},80000);
-  let choice=instanceItems.find(i=>i.id===preparedCatalogInstance.id);
-  $('instanceplan').textContent='Serwer został uruchomiony w PM2. '+(output.pm2Saved?'Zapisano listę PM2.':'Uwaga: nie udało się zapisać listy PM2.')+'\nProces: '+preparedCatalogInstance.id;
-  $('instanceeulabox').classList.add('hide');preparedCatalogInstance=null;
-  if(choice)await switchInstance(choice.id);
-  await refresh();
-  toast('Nowy Paper uruchomiony. Sprawdź logi i wersje pluginów.');
- }catch(e){if(!e?.stale){$('instanceplan').textContent=e.message;toast(e.message,true)}}
- finally{instanceWizardBusy=false;$('instancestart').disabled=false}
+  const output=await api('/api/instances/catalog-start',{...prepared,eulaAccepted:true},80000);
+  choice=instanceItems.find(item=>item.id===prepared.id);
+  $('instanceplan').textContent='PM2 przyjął polecenie startu. Sprawdź w logach, czy Paper zakończył rozruch. '+(output.pm2Saved?'Zapisano listę PM2.':'Uwaga: nie udało się zapisać listy PM2.')+'\nProces: '+(choice?.minecraftProcess||prepared.id);
+  $('instanceeulabox').classList.add('hide');
+  preparedCatalogInstance=null;
+  setWizardStatus('Proces zarejestrowany w PM2.');
+ }catch(error){
+  setWizardStatus('Nie udało się uruchomić instancji.');
+  $('instanceplan').textContent=error.message;
+ }finally{
+  instanceWizardBusy=false;
+  syncWizardControls();
+ }
+ if(choice)await switchInstance(choice.id);
+ if(!preparedCatalogInstance)await refresh();
 }
 let renewal=null;
 async function renewSession(){if(!renewal)renewal=fetch('/api/session/renew',{method:'POST',headers:{'X-RAWCRAFT-CSRF':CSRF}}).then(r=>{if(!r.ok)throw Error('Nie można odnowić sesji tego okna.')}).finally(()=>renewal=null);return renewal}
@@ -498,8 +680,8 @@ async function loadPaymentStatus(){
 setInterval(()=>{if(activeTab==='payments')loadPaymentStatus()},15000);
 function selectService(kind){selectedKind=kind;selectedID=processes.find(p=>p.name===(kind==='minecraft'?prefs.minecraftProcess:prefs.wwwProcess))?.pm_id??null;renderServices();showTab('manage')}
 function openService(id,tab){selectedID=id;selectedKind=serviceKind(currentProcess()||{});renderServices();showTab(tab)}
-async function refresh(){if(!connected||refreshBusy||accountBusy)return;refreshBusy=true;let generation=session;try{let d=await api('/api/status');if(generation!==session)return;processes=d.processes||[];metrics=d.metrics||{};mcCandidates=Array.isArray(d.candidates)?d.candidates:[];try{rawcoreService=await api('/api/rawcore-service',undefined,16000)}catch(e){rawcoreService=null}if(generation!==session)return;renderServices();pollMonitor();renderMetrics();$('statuserror').classList.add('hide');$('connectionlabel').textContent='● Połączono z VPS';$('sshbadge').innerHTML='<i class="dot"></i> Połączenie SSH';}catch(e){if(e?.stale)return;if(generation!==session)return;$('statuserror').textContent='Dane mogą być nieaktualne. '+e.message;$('statuserror').classList.toggle('hide',activeTab==='console');if(activeTab==='console'){$('logerror').textContent='Monitoring: '+e.message;$('logerror').classList.remove('hide')}$('connectionlabel').textContent='● Sprawdź połączenie';$('sshbadge').textContent='Brak świeżych danych'}finally{refreshBusy=false;}}
-function enterApp(d){bootPending=false;$('bootscreen').classList.add('hide');connected=true;session++;monitorData={services:[],disks:[]};prefs.host=d.host;prefs.user=d.user;loadNotificationHistory();$('password').value='';$('login').classList.add('hide');$('app').classList.remove('hide');$('sidebar').classList.remove('hide');$('backlogin').classList.add('hide');$('sidebarhost').textContent=d.user+'@'+d.host;$('avatar').textContent=d.user.slice(0,2).toUpperCase();$('path').value=prefs.serverPath;showTab('dashboard');if(d.warning)toast(d.warning,true);loadSecurity();refresh()}
+async function refresh(){if(!connected||refreshBusy||accountBusy)return;refreshBusy=true;let generation=session;try{let d=await api('/api/status');if(generation!==session)return;processes=d.processes||[];networkProcesses=d.networkProcesses||{};networkObservedAt=Date.now();networkStale=false;renderInstanceCards();metrics=d.metrics||{};mcCandidates=Array.isArray(d.candidates)?d.candidates:[];try{rawcoreService=await api('/api/rawcore-service',undefined,16000)}catch(e){rawcoreService=null}if(generation!==session)return;renderServices();pollMonitor();renderMetrics();$('statuserror').classList.add('hide');$('connectionlabel').textContent='● Połączono z VPS';$('sshbadge').innerHTML='<i class="dot"></i> Połączenie SSH';}catch(e){if(e?.stale)return;if(generation!==session)return;networkStale=true;renderInstanceCards();$('statuserror').textContent='Dane mogą być nieaktualne. '+e.message;$('statuserror').classList.toggle('hide',activeTab==='console');if(activeTab==='console'){$('logerror').textContent='Monitoring: '+e.message;$('logerror').classList.remove('hide')}$('connectionlabel').textContent='● Sprawdź połączenie';$('sshbadge').textContent='Brak świeżych danych'}finally{refreshBusy=false;}}
+function enterApp(d){bootPending=false;$('bootscreen').classList.add('hide');connected=true;session++;networkProcesses={};networkObservedAt=0;networkStale=false;renderInstanceCards();monitorData={services:[],disks:[]};prefs.host=d.host;prefs.user=d.user;loadNotificationHistory();$('password').value='';$('login').classList.add('hide');$('app').classList.remove('hide');$('sidebar').classList.remove('hide');$('backlogin').classList.add('hide');$('sidebarhost').textContent=d.user+'@'+d.host;$('avatar').textContent=d.user.slice(0,2).toUpperCase();$('path').value=prefs.serverPath;showTab('dashboard');if(d.warning)toast(d.warning,true);loadSecurity();refresh()}
 function loginBusy(value){$('connectbtn').disabled=value;$('savedconnect').disabled=value;$('connectbtn').textContent=value?'Łączenie z VPS…':'Połącz z serwerem →'}
 $('loginform').addEventListener('submit',async e=>{e.preventDefault();loginBusy(true);$('loginerr').classList.add('hide');try{let d=await api('/api/connect',{host:$('host').value.trim(),port:Number($('port').value),user:$('username').value.trim(),password:$('password').value,remember:$('rememberpassword').checked,autoLogin:$('autologin').checked});prefs.port=Number($('port').value);prefs.rememberPassword=$('rememberpassword').checked;prefs.autoLogin=$('autologin').checked&&prefs.rememberPassword;enterApp(d);let saved=await api('/api/settings');prefs=saved.preferences;await loadInstanceChoices();setSavedPassword(saved.hasSavedPassword)}catch(e){if(e?.stale)return;$('loginerr').textContent=e.message;$('loginerr').classList.remove('hide')}finally{loginBusy(false)}});
 let bootPending=true;
